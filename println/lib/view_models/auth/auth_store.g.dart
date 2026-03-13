@@ -52,6 +52,34 @@ mixin _$AuthStore on _AuthStore, Store {
     return _$checkAuthAsyncAction.run(() => super.checkAuth());
   }
 
+  late final _$checkEmailAsyncAction = AsyncAction(
+    '_AuthStore.checkEmail',
+    context: context,
+  );
+
+  @override
+  Future<bool> checkEmail(String email) {
+    return _$checkEmailAsyncAction.run(() => super.checkEmail(email));
+  }
+
+  late final _$registerAsyncAction = AsyncAction(
+    '_AuthStore.register',
+    context: context,
+  );
+
+  @override
+  Future<dynamic> register(
+    String email,
+    String password,
+    String username,
+    File? photo,
+    Uint8List? webPhoto,
+  ) {
+    return _$registerAsyncAction.run(
+      () => super.register(email, password, username, photo, webPhoto),
+    );
+  }
+
   late final _$loginAsyncAction = AsyncAction(
     '_AuthStore.login',
     context: context,

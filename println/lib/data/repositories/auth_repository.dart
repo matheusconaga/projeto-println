@@ -13,6 +13,18 @@ class AuthRepository {
     return _service.authStateChanges();
   }
 
+  Future<UserCredential> register(
+      String email,
+      String password,
+      ) {
+
+    return FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+  }
+
   Future<UserCredential> login(String email, String password) {
     return _service.login(email, password);
   }

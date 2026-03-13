@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from app.services.cloudinary_service import upload_image
 from app.services.post_service import PostService
 from app.db.database import get_db
+from app.core.security import get_current_user
+
 
 
 router = APIRouter(prefix="/posts", tags=["Posts"])
@@ -13,12 +15,13 @@ service = PostService()
 
 @router.post("/")
 async def create_post(
-    user_id: str = Form(...),
     content: str = Form(...),
     location: str = Form(None),
     image: UploadFile = File(None),
     db: Session = Depends(get_db)
 ):
+    
+    user_id = get_current_user["uid"]
 
     image_url = None
 
@@ -48,12 +51,13 @@ def get_feed(
 @router.put("/{post_id}")
 async def edit_post(
     post_id: str,
-    user_id: str = Form(...),
     content: str = Form(...),
     location: str = Form(None),
     image: UploadFile = File(None),
     db: Session = Depends(get_db)
 ):
+    
+    user_id = get_current_user["uid"]
 
     return service.edit_post(
         db,
@@ -70,6 +74,12 @@ def get_post_details(post_id: str, db: Session = Depends(get_db)):
     return service.get_post_details(db, post_id)
 
 @router.delete("/{post_id}")
-def delete_post(post_id: str, user_id: str, db: Session = Depends(get_db)):
+def delete_post(
+    post_id: str,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    user_id = current_user["uid"]
 
     return service.delete_post(db, post_id, user_id)

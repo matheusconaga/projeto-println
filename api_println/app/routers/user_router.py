@@ -41,14 +41,14 @@ async def register_form(
     firebase_uid: str = Form(...),
     email: str = Form(...),
     username: str = Form(...),
-    photo: UploadFile = File(None),
+    photo: UploadFile | None = File(None),
     db: Session = Depends(get_db)
 ):
 
     photo_url = None
 
     if photo:
-        photo_url = upload_image(photo.file)
+        photo_url = upload_image(photo)
 
     data = UserCreate(
         firebase_uid=firebase_uid,
