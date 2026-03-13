@@ -17,6 +17,7 @@ dependencies:
   firebase_auth: ^6.2.0
   mobx: ^2.6.0
   flutter_mobx: ^2.3.0
+  dio: ^5.9.2
 
 dev_dependencies:
   flutter_test:
