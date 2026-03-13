@@ -115,15 +115,8 @@ class _AuthPageState extends State<AuthPage> {
                   // Logo redonda
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor: AppColors.primaryLight,
-                    child: Text(
-                      "P",
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.accent,
-                      ),
-                    ),
+                    backgroundColor: isDark ? DarkColors.background : LightColors.background,
+                    child: Image.asset("assets/logo.png")
                   ),
 
                   SizedBox(height: AppSpacing.lg),

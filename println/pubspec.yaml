@@ -27,14 +27,23 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   build_runner: ^2.4.0
   mobx_codegen: ^2.7.5
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo.png"
+  adaptive_icon_background: "#2b2b2b"
+  adaptive_icon_foreground: "assets/logo.png"
+  name: "PrintLn"
 
 flutter:
 
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+     - assets/logo.png
   #   - images/a_dot_ham.jpeg
 
   fonts:
