@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:println/core/routes/app_routes.dart';
 import 'package:println/view_models/auth/auth_store.dart';
 import 'package:println/views/feed/feed_page.dart';
-import 'package:println/views/login/login_page.dart';
+import 'package:println/views/login/auth_page.dart';
 import 'package:println/views/splash/splash_page.dart';
-
 
 class RouteGenerator{
   static final AuthStore _authStore = AuthStore();
@@ -15,7 +14,7 @@ class RouteGenerator{
       case AppRoutes.splashPage:
         return MaterialPageRoute(builder: (_) => SplashPage(authStore: _authStore));
       case AppRoutes.login:
-        return MaterialPageRoute(builder: (_) => LoginPage(authStore: _authStore));
+        return MaterialPageRoute(builder: (_) => AuthPage(authStore: _authStore));
       case AppRoutes.home:
         return MaterialPageRoute(builder: (_) => FeedPage(authStore: _authStore));
       default:
