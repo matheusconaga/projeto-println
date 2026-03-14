@@ -48,7 +48,10 @@ class _FeedPageState extends State<FeedPage> {
     postStore = PostStore(apiService);
 
     feedStore.loadFeed().then((_) {
-      postStore.initializeLikes(authStore.user!.id);
+      postStore.initializeLikes(
+        authStore.user!.id,
+        feedPosts: feedStore.posts.toList(),
+      );
     });
 
     scrollController.addListener(() {

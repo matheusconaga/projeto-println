@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:println/data/repositories/post_repository.dart';
 import 'package:println/core/services/post_service.dart';
+import 'package:println/models/post_model.dart';
 
 part 'post_store.g.dart';
 
@@ -50,12 +51,18 @@ abstract class _PostStore with Store {
   }
 
   @action
-  Future<void> initializeLikes(String currentUserId) async {
+  Future<void> initializeLikes(String currentUserId, {List<PostModel>? feedPosts}) async {
     try {
       final likedPostIds = await api.getUserLikes(currentUserId);
       likedPosts.clear();
       for (var id in likedPostIds) {
         likedPosts[id] = true;
+      }
+
+      if (feedPosts != null) {
+        for (var post in feedPosts) {
+          postLikes[post.id] = post.likes;
+        }
       }
     } catch (e) {
       error = "Erro ao carregar likes do usuário";

@@ -39,7 +39,6 @@ class PostService {
     );
   }
 
-
   Future<void> unlikePost(String postId, String userId) async {
     await api.dio.delete(
       "/likes/$postId/like",
