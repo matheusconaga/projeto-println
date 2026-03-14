@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:println/core/theme/app_colors.dart';
 import 'package:println/core/theme/app_text_styles.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -19,7 +20,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: isDark ? Colors.black : Colors.white,
+            backgroundColor: isDark ? DarkColors.inputFill : LightColors.inputFill,
             child: Image.asset("assets/logo.png"),
           ),
           const SizedBox(width: 8),

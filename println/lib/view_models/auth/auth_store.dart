@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:println/data/repositories/user_repository.dart';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import 'package:println/models/user_model.dart';
 
 part 'auth_store.g.dart';
 
@@ -18,8 +19,14 @@ abstract class _AuthStore with Store {
 
   _AuthStore() {
     _authStream = _repository.authStateChanges();
-    _authStream.listen((user) {
-      isLogged = user != null;
+    _authStream.listen((firebaseUser) async {
+      isLogged = firebaseUser != null;
+
+      if (firebaseUser != null) {
+        user = await _userRepository.getUserById(firebaseUser.uid);
+      } else {
+        user = null;
+      }
     });
   }
 
@@ -29,11 +36,21 @@ abstract class _AuthStore with Store {
   @observable
   bool loading = false;
 
+  @observable
+  UserModel? user;
+
   @action
   Future checkAuth() async {
     loading = true;
-    final user = _repository.getCurrentUser();
-    isLogged = user != null;
+    final firebaseUser = _repository.getCurrentUser();
+    isLogged = firebaseUser != null;
+
+    if (firebaseUser != null) {
+      user = await _userRepository.getUserById(firebaseUser.uid);
+    } else {
+      user = null;
+    }
+
     loading = false;
   }
 
@@ -50,36 +67,33 @@ abstract class _AuthStore with Store {
       File? photo,
       Uint8List? webPhoto,
       ) async {
-
     loading = true;
-
     try {
-
       final credential = await _repository.register(email, password);
-      final user = credential.user!;
+      final userId = credential.user!;
 
-      await _userRepository.registerUser(
-        firebaseUid: user.uid,
+      final newUser = await _userRepository.registerUser(
+        id: userId.uid,
         email: email,
         username: username,
         photo: photo,
         webPhoto: webPhoto,
-
       );
 
+      user = newUser;
+
     } finally {
-
       loading = false;
-
     }
-
   }
 
   @action
   Future login(String email, String password) async {
     loading = true;
     try {
-      await _repository.login(email, password);
+      final credential = await _repository.login(email, password);
+      final firebaseUser = credential.user!;
+      user = await _userRepository.getUserById(firebaseUser.uid);
     } finally {
       loading = false;
     }
@@ -90,6 +104,7 @@ abstract class _AuthStore with Store {
     loading = true;
     try {
       await _repository.logout();
+      user = null;
     } finally {
       loading = false;
     }

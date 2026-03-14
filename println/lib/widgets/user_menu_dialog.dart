@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:println/view_models/auth/auth_store.dart';
 import 'package:println/view_models/theme/theme_store.dart';
 
 class UserMenuDialog extends StatelessWidget {
   final VoidCallback onEditProfile;
   final VoidCallback onLogout;
   final ThemeStore themeStore;
+  final AuthStore authStore;
 
   const UserMenuDialog({
     super.key,
     required this.onEditProfile,
     required this.onLogout,
     required this.themeStore,
+    required this.authStore,
   });
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +60,15 @@ class UserMenuDialog extends StatelessWidget {
                 ],
               ),
             );
-            if (confirmed ?? false) {
-              onLogout();
+
+            if (confirmed == true) {
+              await authStore.logout();
+
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/login',
+                    (route) => false,
+              );
             }
           },
         ),

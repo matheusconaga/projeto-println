@@ -45,9 +45,7 @@ class _FormInputState extends State<FormInput> {
     final theme = Theme.of(context);
 
     return SizedBox(
-      width: Responsive.isMobile(context)
-          ? Responsive.width(context) * 0.8
-          : Responsive.width(context) * 0.5,
+      width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

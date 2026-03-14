@@ -19,6 +19,13 @@ class Validators {
     return null;
   }
 
+  static String? validarConteudo (String? value){
+    if (value == null || value.trim().isEmpty) {
+      return 'O conteúdo é um campo obrigatório';
+    }
+    return null;
+  }
+
   static String? validarSenha(String? value) {
     if (value == null || value.length < 6) {
       return 'Senha deve ter no mínimo 6 caracteres';

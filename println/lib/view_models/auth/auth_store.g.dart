@@ -42,6 +42,21 @@ mixin _$AuthStore on _AuthStore, Store {
     });
   }
 
+  late final _$userAtom = Atom(name: '_AuthStore.user', context: context);
+
+  @override
+  UserModel? get user {
+    _$userAtom.reportRead();
+    return super.user;
+  }
+
+  @override
+  set user(UserModel? value) {
+    _$userAtom.reportWrite(value, super.user, () {
+      super.user = value;
+    });
+  }
+
   late final _$checkAuthAsyncAction = AsyncAction(
     '_AuthStore.checkAuth',
     context: context,
@@ -104,7 +119,8 @@ mixin _$AuthStore on _AuthStore, Store {
   String toString() {
     return '''
 isLogged: ${isLogged},
-loading: ${loading}
+loading: ${loading},
+user: ${user}
     ''';
   }
 }

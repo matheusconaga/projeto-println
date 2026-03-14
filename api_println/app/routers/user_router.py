@@ -23,35 +23,40 @@ def check_email(email: str, db: Session = Depends(get_db)):
 
     return {"exists": False}
 
+
+@router.get("/firebase/{user_id}", response_model=UserResponse)
+def get_user_by_firebase(user_id: str, db: Session = Depends(get_db)):
+    user = service.repo.get_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
 # Para o cadastro do usuário 
 @router.post("/register", response_model=UserResponse)
 def register(data: UserCreate, db: Session = Depends(get_db)):
 
     return service.register_user(db, data)
 
-# Login do usuário 
+
 @router.get("/{user_id}", response_model=UserResponse)
 def get_user(user_id: str, db: Session = Depends(get_db)):
-
     return service.repo.get_by_id(db, user_id)
 
 
 @router.post("/register-form", response_model=UserResponse)
 async def register_form(
-    firebase_uid: str = Form(...),
+    id: str = Form(...),
     email: str = Form(...),
     username: str = Form(...),
     photo: UploadFile | None = File(None),
     db: Session = Depends(get_db)
 ):
-
     photo_url = None
-
     if photo and photo.filename != "":
         photo_url = upload_image(photo.file, "users")
 
     data = UserCreate(
-        firebase_uid=firebase_uid,
+        firebase_uid=id,
         email=email,
         username=username,
         photo=photo_url

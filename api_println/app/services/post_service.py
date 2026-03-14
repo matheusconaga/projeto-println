@@ -21,9 +21,43 @@ class PostService:
         return self.repository.create(db, post)
 
 
-    def get_feed(self, db: Session, page: int, limit: int):
+    def get_feed(self, db, page, limit):
 
-        return self.repository.get_feed(db, page, limit)
+        offset = (page - 1) * limit
+
+        posts = (
+            db.query(Post)
+            .order_by(Post.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+
+        result = []
+
+        for post in posts:
+
+            result.append({
+                "id": post.id,
+                "content": post.content,
+                "image_url": post.image_url,
+                "location": post.location,
+
+                "likes_count": post.likes_count,
+                "comments_count": post.comments_count,
+                "saves_count": post.saves_count,
+
+                "created_at": post.created_at,
+                "updated_at": post.updated_at,
+
+                "user": {
+                    "id": post.user.id,
+                    "username": post.user.username,
+                    "photo": post.user.photo
+                }
+            })
+
+        return result
     
     
     def edit_post(

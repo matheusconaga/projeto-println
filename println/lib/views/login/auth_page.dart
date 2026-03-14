@@ -45,7 +45,7 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Future<void> _checkEmail() async {
-    final exists = await authStore.checkEmail(emailController.text);
+    final exists = await authStore.checkEmail(emailController.text.toLowerCase());
     setState(() {
       emailChecked = true;
       userExists = exists;

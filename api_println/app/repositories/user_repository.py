@@ -11,7 +11,7 @@ class UserRepository:
     def get_by_id(self, db: Session, user_id: str):
 
         return db.query(User).filter(User.id == user_id).first()
-
+    
 
     def create(self, db: Session, user: User):
 

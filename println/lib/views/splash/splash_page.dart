@@ -12,9 +12,17 @@ class SplashPage extends StatelessWidget {
     return Observer(
       builder: (_) {
         if (authStore.isLogged) {
-          Future.microtask(() => Navigator.pushReplacementNamed(context, '/home'));
+          Future.microtask(() => Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/home',
+                (route) => false,
+          ));
         } else {
-          Future.microtask(() => Navigator.pushReplacementNamed(context, '/login'));
+          Future.microtask(() => Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/login',
+                (route) => false,
+          ));
         }
 
         return const Scaffold(

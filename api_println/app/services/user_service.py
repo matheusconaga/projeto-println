@@ -37,7 +37,6 @@ class UserService:
         return self.repo.get_by_email(db, email)
     
     
-    
     def update_user(self, db: Session, user_id: str, username: str = None, photo: str = None):
 
         user = self.repo.get_by_id(db, user_id)

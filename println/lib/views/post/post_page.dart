@@ -10,9 +10,11 @@ import 'package:println/core/services/post_service.dart';
 import 'package:println/core/theme/app_spacing.dart';
 import 'package:println/core/theme/app_text_styles.dart';
 import 'package:println/core/theme/app_colors.dart';
+import 'package:println/core/validators/validators.dart';
 
 import 'package:println/view_models/post/post_store.dart';
 import 'package:println/core/services/api_service.dart';
+import 'package:println/widgets/form_input.dart';
 
 class PostPage extends StatefulWidget {
 
@@ -89,6 +91,8 @@ class _PostPageState extends State<PostPage> {
 
     if (!_formKey.currentState!.validate()) return;
 
+    bool created = false;
+
     if (widget.isEditing) {
 
       await postStore.editPost(
@@ -99,9 +103,11 @@ class _PostPageState extends State<PostPage> {
         webImage: webImage,
       );
 
+      created = true;
+
     } else {
 
-      await postStore.createPost(
+      created = await postStore.createPost(
         content: contentController.text,
         location: locationController.text,
         selectedImage: selectedImage,
@@ -110,8 +116,8 @@ class _PostPageState extends State<PostPage> {
 
     }
 
-    if (postStore.error == null && mounted) {
-      Navigator.pop(context);
+    if (created && mounted) {
+      Navigator.pop(context, true);
     } else if (postStore.error != null) {
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -184,42 +190,27 @@ class _PostPageState extends State<PostPage> {
                     });
 
                   },
-                  child: const Text("Remover imagem"),
+                  child: const Center(
+                    child: Text("Remover imagem"),
+                  ),
                 ),
 
               const SizedBox(height: AppSpacing.lg),
 
-              TextFormField(
-
+              FormInput(
                 controller: contentController,
+                hint: "Escreva algo...",
+                title: "Conteúdo",
                 maxLines: 4,
-
-                decoration: const InputDecoration(
-                  labelText: "Conteúdo",
-                ),
-
-                validator: (value) {
-
-                  if (value == null || value.isEmpty) {
-                    return "Conteúdo obrigatório";
-                  }
-
-                  return null;
-
-                },
-
+                validator: Validators.validarConteudo,
               ),
 
               const SizedBox(height: AppSpacing.lg),
 
-              TextFormField(
-
+              FormInput(
                 controller: locationController,
-
-                decoration: const InputDecoration(
-                  labelText: "Localização",
-                ),
-
+                hint: "Localização opcional",
+                title: "Localização",
               ),
 
               const SizedBox(height: AppSpacing.xl),
