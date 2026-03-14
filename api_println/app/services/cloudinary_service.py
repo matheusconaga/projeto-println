@@ -9,8 +9,11 @@ cloudinary.config(
     api_secret=CLOUD_API_SECRET
 )
 
-def upload_image(file):
+def upload_image(file, folder="general"):
 
-    result = cloudinary.uploader.upload(file.file)
+    result = cloudinary.uploader.upload(
+        file,
+        folder=folder
+    )
 
     return result["secure_url"]

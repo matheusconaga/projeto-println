@@ -16,12 +16,13 @@ service = PostService()
 @router.post("/")
 async def create_post(
     content: str = Form(...),
-    location: str = Form(None),
-    image: UploadFile = File(None),
+    location: str | None = Form(None),
+    image: UploadFile | None = File(None),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    
-    user_id = get_current_user["uid"]
+
+    user_id = current_user["uid"]
 
     image_url = None
 
@@ -53,11 +54,17 @@ async def edit_post(
     post_id: str,
     content: str = Form(...),
     location: str = Form(None),
-    image: UploadFile = File(None),
+    image: UploadFile | None = File(None),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    
-    user_id = get_current_user["uid"]
+
+    user_id = current_user["uid"]
+
+    image_url = None
+
+    if image and image.filename != "":
+        image_url = upload_image(image.file, "posts")
 
     return service.edit_post(
         db,
@@ -65,7 +72,7 @@ async def edit_post(
         user_id,
         content,
         location,
-        image
+        image_url
     )
     
 @router.get("/{post_id}")

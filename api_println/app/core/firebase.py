@@ -1,6 +1,12 @@
 import firebase_admin
-from firebase_admin import credentials, auth
+from firebase_admin import credentials
+import os
 
-cred = credentials.Certificate("firebase_service_account.json")
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-firebase_admin.initialize_app(cred)
+cred_path = os.path.join(BASE_DIR, "core", "firebase_service_account.json")
+
+if not firebase_admin._apps:
+
+    cred = credentials.Certificate(cred_path)
+    firebase_admin.initialize_app(cred)

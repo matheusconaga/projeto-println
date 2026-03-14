@@ -47,8 +47,8 @@ async def register_form(
 
     photo_url = None
 
-    if photo:
-        photo_url = upload_image(photo)
+    if photo and photo.filename != "":
+        photo_url = upload_image(photo.file, "users")
 
     data = UserCreate(
         firebase_uid=firebase_uid,
@@ -63,7 +63,7 @@ async def register_form(
 async def update_user(
     user_id: str,
     username: str = Form(None),
-    photo: UploadFile = File(None),
+    photo: UploadFile | None = File(None),
     db: Session = Depends(get_db)
 ):
 

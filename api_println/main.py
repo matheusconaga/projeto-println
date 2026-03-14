@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from app.core import firebase
+
 from app.routers.post_router import router as post_router
 from app.routers.like_router import router as like_router
 from app.routers.saved_post_router import router as saved_post_router

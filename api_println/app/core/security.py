@@ -6,7 +6,10 @@ async def get_current_user(request: Request):
     auth_header = request.headers.get("Authorization")
 
     if not auth_header:
-        raise HTTPException(status_code=401, detail="Authorization header missing")
+        raise HTTPException(status_code=401, detail="Missing Authorization header")
+
+    if not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid Authorization format")
 
     token = auth_header.split(" ")[1]
 
@@ -16,6 +19,11 @@ async def get_current_user(request: Request):
 
         return decoded_token
 
-    except Exception:
+    except Exception as e:
 
-        raise HTTPException(status_code=401, detail="Invalid Firebase token")
+        print("Firebase token error:", e)
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Firebase token"
+        )
