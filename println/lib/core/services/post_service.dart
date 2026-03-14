@@ -23,6 +23,7 @@ class PostService {
     return await api.dio.get("/posts/feed?page=$page");
   }
 
+  // Funcoes do like
   Future<List<String>> getUserLikes(String userId) async {
     final response = await api.dio.get(
       "/likes/user_likes",
@@ -42,6 +43,29 @@ class PostService {
   Future<void> unlikePost(String postId, String userId) async {
     await api.dio.delete(
       "/likes/$postId/like",
+      queryParameters: {"user_id": userId},
+    );
+  }
+
+  // Funcoes do save
+  Future<List<Map<String, dynamic>>> getUserSaves(String userId) async {
+    final response = await api.dio.get(
+      "/saves/user_saves",
+      queryParameters: {"user_id": userId},
+    );
+    return List<Map<String, dynamic>>.from(response.data);
+  }
+
+  Future<void> savePost(String postId, String userId) async {
+    await api.dio.post(
+      "/saves/$postId/save",
+      queryParameters: {"user_id": userId},
+    );
+  }
+
+  Future<void> unsavePost(String postId, String userId) async {
+    await api.dio.delete(
+      "/saves/$postId/save",
       queryParameters: {"user_id": userId},
     );
   }

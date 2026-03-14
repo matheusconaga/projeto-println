@@ -30,6 +30,13 @@ abstract class _PostStore with Store {
   @observable
   ObservableMap<String, int> postLikes = ObservableMap<String, int>();
 
+  @observable
+  ObservableMap<String, bool> savedPosts = ObservableMap<String, bool>();
+
+  @observable
+  ObservableMap<String, int> postSaves = ObservableMap<String, int>();
+
+  // LIKES
   @action
   Future<void> toggleLike(String postId, String userId) async {
     final currentlyLiked = likedPosts[postId] ?? false;
@@ -69,6 +76,44 @@ abstract class _PostStore with Store {
     }
   }
 
+  // SAVES
+  @action
+  Future<void> toggleSave(String postId, String userId) async {
+    final currentlySaved = savedPosts[postId] ?? false;
+
+    try {
+      if (currentlySaved) {
+        await api.unsavePost(postId, userId);
+        postSaves[postId] = ((postSaves[postId] ?? 1) - 1).clamp(0, double.infinity).toInt();
+      } else {
+        await api.savePost(postId, userId);
+        postSaves[postId] = ((postSaves[postId] ?? 0) + 1);
+      }
+
+      savedPosts[postId] = !currentlySaved;
+    } catch (e) {
+      error = "Erro ao atualizar save";
+    }
+  }
+
+  @action
+  Future<void> initializeSaves(String currentUserId) async {
+    try {
+      final savedPostsJson = await api.getUserSaves(currentUserId);
+
+      savedPosts.clear();
+
+      for (var postJson in savedPostsJson) {
+        final post = PostModel.fromJson(postJson);
+        savedPosts[post.id] = true;
+      }
+    } catch (e) {
+      error = "Erro ao carregar posts salvos";
+    }
+  }
+
+
+  // POSTS
   @action
   Future<bool> createPost({
     required String content,

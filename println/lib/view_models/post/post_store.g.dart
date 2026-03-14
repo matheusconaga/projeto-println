@@ -75,6 +75,42 @@ mixin _$PostStore on _PostStore, Store {
     });
   }
 
+  late final _$savedPostsAtom = Atom(
+    name: '_PostStore.savedPosts',
+    context: context,
+  );
+
+  @override
+  ObservableMap<String, bool> get savedPosts {
+    _$savedPostsAtom.reportRead();
+    return super.savedPosts;
+  }
+
+  @override
+  set savedPosts(ObservableMap<String, bool> value) {
+    _$savedPostsAtom.reportWrite(value, super.savedPosts, () {
+      super.savedPosts = value;
+    });
+  }
+
+  late final _$postSavesAtom = Atom(
+    name: '_PostStore.postSaves',
+    context: context,
+  );
+
+  @override
+  ObservableMap<String, int> get postSaves {
+    _$postSavesAtom.reportRead();
+    return super.postSaves;
+  }
+
+  @override
+  set postSaves(ObservableMap<String, int> value) {
+    _$postSavesAtom.reportWrite(value, super.postSaves, () {
+      super.postSaves = value;
+    });
+  }
+
   late final _$toggleLikeAsyncAction = AsyncAction(
     '_PostStore.toggleLike',
     context: context,
@@ -97,6 +133,28 @@ mixin _$PostStore on _PostStore, Store {
   }) {
     return _$initializeLikesAsyncAction.run(
       () => super.initializeLikes(currentUserId, feedPosts: feedPosts),
+    );
+  }
+
+  late final _$toggleSaveAsyncAction = AsyncAction(
+    '_PostStore.toggleSave',
+    context: context,
+  );
+
+  @override
+  Future<void> toggleSave(String postId, String userId) {
+    return _$toggleSaveAsyncAction.run(() => super.toggleSave(postId, userId));
+  }
+
+  late final _$initializeSavesAsyncAction = AsyncAction(
+    '_PostStore.initializeSaves',
+    context: context,
+  );
+
+  @override
+  Future<void> initializeSaves(String currentUserId) {
+    return _$initializeSavesAsyncAction.run(
+      () => super.initializeSaves(currentUserId),
     );
   }
 
@@ -162,7 +220,9 @@ mixin _$PostStore on _PostStore, Store {
 loading: ${loading},
 error: ${error},
 likedPosts: ${likedPosts},
-postLikes: ${postLikes}
+postLikes: ${postLikes},
+savedPosts: ${savedPosts},
+postSaves: ${postSaves}
     ''';
   }
 }

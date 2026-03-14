@@ -25,18 +25,19 @@ class PostModel {
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
+    final userJson = json["user"] as Map<String, dynamic>?;
 
     return PostModel(
       id: json["id"],
       content: json["content"],
       imageUrl: json["image_url"],
       location: json["location"],
-      likes: json["likes_count"],
-      comments: json["comments_count"],
-      saves: json["saves_count"],
+      likes: json["likes_count"] ?? 0,
+      comments: json["comments_count"] ?? 0,
+      saves: json["saves_count"] ?? 0,
       createdAt: DateTime.parse(json["created_at"]).toLocal(),
-      user: json["user"] != null
-          ? UserModel.fromJson(json["user"])
+      user: userJson != null
+          ? UserModel.fromJson(userJson)
           : UserModel(
         id: json["user_id"] ?? "unknown",
         username: "Desconhecido",
@@ -44,4 +45,5 @@ class PostModel {
       ),
     );
   }
+
 }

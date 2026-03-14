@@ -47,11 +47,13 @@ class _FeedPageState extends State<FeedPage> {
     feedStore = FeedStore(apiService);
     postStore = PostStore(apiService);
 
-    feedStore.loadFeed().then((_) {
-      postStore.initializeLikes(
-        authStore.user!.id,
+    feedStore.loadFeed().then((_) async {
+      final userId = authStore.user!.id;
+      await postStore.initializeLikes(
+        userId,
         feedPosts: feedStore.posts.toList(),
       );
+      await postStore.initializeSaves(userId);
     });
 
     scrollController.addListener(() {
@@ -177,6 +179,23 @@ class _FeedPageState extends State<FeedPage> {
 
             }
 
+          }
+          if (index == 2) {
+            final result = await Navigator.pushNamed(
+              context,
+              AppRoutes.savedPosts,
+            );
+
+            if (result == true) {
+              await feedStore.loadFeed();
+
+              final userId = authStore.user!.id;
+              await postStore.initializeLikes(
+                userId,
+                feedPosts: feedStore.posts.toList(),
+              );
+              await postStore.initializeSaves(userId);
+            }
           }
 
           if (index == 3) {

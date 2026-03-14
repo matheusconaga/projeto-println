@@ -3,9 +3,16 @@ import 'package:println/core/theme/app_colors.dart';
 import 'package:println/core/theme/app_text_styles.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String? title;
+  final VoidCallback? onBackTap;
   final VoidCallback onNotificationsTap;
 
-  const CustomAppBar({super.key, required this.onNotificationsTap});
+  const CustomAppBar({
+    super.key,
+    this.title,
+    this.onBackTap,
+    required this.onNotificationsTap,
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -16,7 +23,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       elevation: 0,
-      title: Row(
+      leading: onBackTap != null
+          ? IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: onBackTap,
+      )
+          : null,
+      title: title != null
+          ? Text(title!, style: AppTextStyles.heading1.copyWith(color: Colors.white))
+          : Row(
         children: [
           CircleAvatar(
             radius: 20,

@@ -5,6 +5,8 @@ class AppRoutes{
   static const String register = "/register";
   static const String home = "/home";
 
+
   static const String createPost  = "/post/create";
+  static const String savedPosts = "/savedposts";
 
 }

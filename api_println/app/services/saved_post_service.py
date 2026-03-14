@@ -1,11 +1,38 @@
 from sqlalchemy.orm import Session
 from app.repositories.saved_post_repository import SavedPostRepository
-
+from app.models.saved_post import SavedPost
+from app.models.post import Post
 
 class SavedPostService:
 
     def __init__(self):
         self.repository = SavedPostRepository()
+
+    def get_user_saves(self, db: Session, user_id: str):
+        saves = db.query(SavedPost).filter(SavedPost.user_id == user_id).all()
+        post_ids = [save.post_id for save in saves]
+
+        posts = db.query(Post).filter(Post.id.in_(post_ids)).all()
+
+        result = []
+        for post in posts:
+            result.append({
+                "id": post.id,
+                "content": post.content,
+                "image_url": post.image_url,
+                "location": post.location,
+                "likes_count": post.likes_count,
+                "comments_count": post.comments_count,
+                "saves_count": post.saves_count,
+                "created_at": post.created_at,
+                "updated_at": post.updated_at,
+                "user": {
+                    "id": post.user.id,
+                    "username": post.user.username,
+                    "photo": post.user.photo
+                }
+            })
+        return result
 
 
     def save_post(self, db: Session, user_id: str, post_id: str):

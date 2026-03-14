@@ -156,10 +156,15 @@ class PostCard extends StatelessWidget {
                   count: post.comments,
                 ),
 
-                _ActionButton(
-                  icon: Icons.bookmark_border,
-                  label: "Salvar",
-                  count: post.saves,
+                Observer(
+                  builder: (_) => _ActionButton(
+                    icon: postStore.savedPosts[post.id] == true
+                        ? Icons.bookmark
+                        : Icons.bookmark_border,
+                    label: "Salvar",
+                    count: postStore.postSaves[post.id] ?? post.saves,
+                    onTap: () => postStore.toggleSave(post.id, currentUserId),
+                  ),
                 ),
               ],
             )
