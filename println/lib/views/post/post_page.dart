@@ -21,12 +21,14 @@ class PostPage extends StatefulWidget {
   final String? postId;
   final String? initialContent;
   final String? initialLocation;
+  final String? initialImageUrl;
 
   const PostPage({
     super.key,
     this.postId,
     this.initialContent,
     this.initialLocation,
+    this.initialImageUrl,
   });
 
   bool get isEditing => postId != null;
@@ -44,6 +46,8 @@ class _PostPageState extends State<PostPage> {
 
   File? selectedImage;
   Uint8List? webImage;
+  String? imageUrl;
+  bool removeImage = false;
 
   final ImagePicker picker = ImagePicker();
 
@@ -59,6 +63,7 @@ class _PostPageState extends State<PostPage> {
 
     contentController.text = widget.initialContent ?? "";
     locationController.text = widget.initialLocation ?? "";
+    imageUrl = widget.initialImageUrl;
   }
 
   Future<void> pickImage() async {
@@ -75,12 +80,17 @@ class _PostPageState extends State<PostPage> {
 
       setState(() {
         webImage = bytes;
+        imageUrl = null;
+        selectedImage = null;
+
       });
 
     } else {
 
       setState(() {
         selectedImage = File(image.path);
+        imageUrl = null;
+        webImage = null;
       });
 
     }
@@ -101,6 +111,7 @@ class _PostPageState extends State<PostPage> {
         location: locationController.text,
         selectedImage: selectedImage,
         webImage: webImage,
+        removeImage: removeImage,
       );
 
       created = true;
@@ -172,6 +183,8 @@ class _PostPageState extends State<PostPage> {
                       ? Image.memory(webImage!, fit: BoxFit.cover)
                       : selectedImage != null
                       ? Image.file(selectedImage!, fit: BoxFit.cover)
+                      : imageUrl != null
+                      ? Image.network(imageUrl!, fit: BoxFit.cover)
                       : const Center(
                     child: Icon(Icons.add_a_photo, size: 40),
                   ),
@@ -180,13 +193,15 @@ class _PostPageState extends State<PostPage> {
 
               ),
 
-              if (webImage != null || selectedImage != null)
+              if (webImage != null || selectedImage != null || imageUrl != null)
                 TextButton(
                   onPressed: () {
 
                     setState(() {
                       webImage = null;
                       selectedImage = null;
+                      imageUrl = null;
+                      removeImage = true;
                     });
 
                   },

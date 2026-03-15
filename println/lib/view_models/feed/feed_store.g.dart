@@ -92,6 +92,23 @@ mixin _$FeedStore on _FeedStore, Store {
     return _$loadMoreAsyncAction.run(() => super.loadMore());
   }
 
+  late final _$_FeedStoreActionController = ActionController(
+    name: '_FeedStore',
+    context: context,
+  );
+
+  @override
+  void updatePost(PostModel updatedPost) {
+    final _$actionInfo = _$_FeedStoreActionController.startAction(
+      name: '_FeedStore.updatePost',
+    );
+    try {
+      return super.updatePost(updatedPost);
+    } finally {
+      _$_FeedStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''

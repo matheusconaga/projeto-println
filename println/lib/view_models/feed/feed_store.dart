@@ -49,6 +49,15 @@ abstract class _FeedStore with Store {
   }
 
   @action
+  void updatePost(PostModel updatedPost) {
+
+    final index = posts.indexWhere((p) => p.id == updatedPost.id);
+    if (index == -1) return;
+    posts[index] = updatedPost;
+
+  }
+
+  @action
   Future<void> loadMore() async {
     if (loadingMore || !hasMore) return;
 

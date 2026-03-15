@@ -7,6 +7,7 @@ class AppRoutes{
 
 
   static const String createPost  = "/post/create";
+  static const String detailsPost  = "/post/details";
   static const String savedPosts = "/savedposts";
 
 }

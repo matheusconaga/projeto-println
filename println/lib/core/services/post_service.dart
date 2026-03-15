@@ -23,6 +23,11 @@ class PostService {
     return await api.dio.get("/posts/feed?page=$page");
   }
 
+  Future<Map<String, dynamic>> getPostDetails(String postId) async {
+    final response = await api.dio.get("/posts/$postId");
+    return Map<String, dynamic>.from(response.data);
+  }
+
   // Funcoes do like
   Future<List<String>> getUserLikes(String userId) async {
     final response = await api.dio.get(

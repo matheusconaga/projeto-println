@@ -53,7 +53,8 @@ def get_feed(
 async def edit_post(
     post_id: str,
     content: str = Form(...),
-    location: str = Form(None),
+    location: str | None = Form(None),
+    remove_image: bool = Form(False),
     image: UploadFile | None = File(None),
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -64,7 +65,7 @@ async def edit_post(
     image_url = None
 
     if image and image.filename != "":
-        image_url = upload_image(image.file, "posts")
+        image_url = upload_image(image.file)
 
     return service.edit_post(
         db,
@@ -72,7 +73,8 @@ async def edit_post(
         user_id,
         content,
         location,
-        image_url
+        image_url,
+        remove_image
     )
     
 @router.get("/{post_id}")

@@ -40,4 +40,41 @@ class PostRepository {
 
     await service.createPost(data);
   }
+
+  Future<void> editPost({
+    required String postId,
+    required String content,
+    String? location,
+    File? photo,
+    Uint8List? webPhoto,
+    bool removeImage = false,
+  }) async {
+
+    MultipartFile? imageFile;
+
+    if (kIsWeb && webPhoto != null) {
+      imageFile = MultipartFile.fromBytes(
+        webPhoto,
+        filename: "post.jpg",
+      );
+    }
+
+    if (!kIsWeb && photo != null) {
+      imageFile = await MultipartFile.fromFile(
+        photo.path,
+        filename: photo.path.split("/").last,
+      );
+    }
+
+    FormData data = FormData.fromMap({
+      "content": content,
+      if (location != null && location.isNotEmpty) "location": location,
+      if (imageFile != null) "image": imageFile,
+      if (removeImage) "remove_image": true,
+    });
+
+    await service.editPost(postId, data);
+  }
+
+
 }

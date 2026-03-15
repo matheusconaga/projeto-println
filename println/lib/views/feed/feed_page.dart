@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:println/core/routes/app_routes.dart';
+import 'package:println/models/post_model.dart';
 import 'package:println/view_models/auth/auth_store.dart';
 import 'package:println/view_models/post/post_store.dart';
 import 'package:println/view_models/theme/theme_store.dart';
@@ -137,6 +138,59 @@ class _FeedPageState extends State<FeedPage> {
                   post: post,
                   postStore: postStore,
                   currentUserId: authStore.user!.id,
+                  authStore: authStore,
+                  feedStore: feedStore,
+                  onEdit: () async {
+                    final result = await Navigator.pushNamed(
+                      context,
+                      AppRoutes.createPost,
+                      arguments: {
+                        "postId": post.id,
+                        "content": post.content,
+                        "location": post.location,
+                        "imageUrl": post.imageUrl,
+                      },
+                    );
+
+                    if (result == true) {
+                      await feedStore.loadFeed();
+                    }
+
+                  },
+                  onTap: () async {
+                    final result = await Navigator.pushNamed(
+                      context,
+                      AppRoutes.detailsPost,
+                      arguments: {
+                        "postId": post.id,
+                        "postStore": postStore,
+                      },
+                    );
+
+                    if (result != null && result is Map) {
+
+                      final index = feedStore.posts.indexWhere((p) => p.id == result["postId"]);
+                      if (index != -1) {
+                        final oldPost = feedStore.posts[index];
+                        feedStore.posts[index] = PostModel(
+                          id: oldPost.id,
+                          content: result["content"],
+                          location: result["location"],
+                          imageUrl: oldPost.imageUrl,
+                          likes: oldPost.likes,
+                          comments: oldPost.comments,
+                          saves: oldPost.saves,
+                          createdAt: oldPost.createdAt,
+                          user: oldPost.user,
+                        );
+
+                      }
+                    }
+
+                    if (result == true) {
+                      await feedStore.loadFeed();
+                    }
+                  },
                 );
               },
             ),

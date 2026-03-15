@@ -67,7 +67,8 @@ class PostService:
         user_id: str,
         content: str,
         location: str,
-        image
+        image_url: str | None,
+        remove_image: bool
     ):
 
         post = self.repository.get_by_id(db, post_id)
@@ -78,17 +79,13 @@ class PostService:
         if post.user_id != user_id:
             return {"error": "Você não pode editar este post"}
 
-        image_url = None
-
-        if image and image.filename != "":
-            image_url = upload_image(image.file)
-
         return self.repository.update(
             db,
             post,
             content,
             location,
-            image_url
+            image_url,
+            remove_image
         )
         
     def get_post_details(self, db: Session, post_id: str):

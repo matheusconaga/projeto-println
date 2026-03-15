@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session,joinedload
 from sqlalchemy import desc
 from app.models.post import Post
 from app.models.comment import Comment
@@ -60,13 +60,16 @@ class PostRepository:
         post: Post,
         content: str,
         location: str,
-        image_url: str | None
+        image_url: str | None,
+        remove_image: bool
     ):
 
         post.content = content
         post.location = location
 
-        if image_url is not None:
+        if remove_image:
+            post.image_url = None
+        elif image_url is not None:
             post.image_url = image_url
 
         db.commit()
@@ -94,32 +97,41 @@ class PostRepository:
 
     def get_post_with_comments(self, db: Session, post_id: str, limit_comments: int = 5):
 
-        post = db.query(Post).filter(Post.id == post_id).first()
+        post = (
+            db.query(Post)
+            .options(
+                joinedload(Post.user),
+                joinedload(Post.comments).joinedload(Comment.user)
+            )
+            .filter(Post.id == post_id)
+            .first()
+        )
 
         if not post:
             return None
 
-        comments = (
-            db.query(Comment)
-            .filter(Comment.post_id == post_id)
-            .order_by(Comment.created_at.desc())
-            .limit(limit_comments)
-            .all()
-        )
+        comments = sorted(
+            post.comments,
+            key=lambda x: x.created_at,
+            reverse=True
+        )[:limit_comments]
 
         comments_list = []
 
         for comment in comments:
             comments_list.append({
                 "id": comment.id,
-                "user_id": comment.user_id,
                 "content": comment.content,
-                "created_at": comment.created_at
+                "created_at": comment.created_at,
+                "user": {
+                    "id": comment.user.id,
+                    "username": comment.user.username,
+                    "photo": comment.user.photo
+                }
             })
 
         return {
             "id": post.id,
-            "user_id": post.user_id,
             "content": post.content,
             "image_url": post.image_url,
             "location": post.location,
@@ -128,6 +140,11 @@ class PostRepository:
             "saves_count": post.saves_count,
             "created_at": post.created_at,
             "updated_at": post.updated_at,
+            "user": {
+                "id": post.user.id,
+                "username": post.user.username,
+                "photo": post.user.photo
+            },
             "comments_preview": comments_list
         }
 

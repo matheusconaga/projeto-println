@@ -111,6 +111,24 @@ mixin _$PostStore on _PostStore, Store {
     });
   }
 
+  late final _$feedPostsAtom = Atom(
+    name: '_PostStore.feedPosts',
+    context: context,
+  );
+
+  @override
+  ObservableList<PostModel> get feedPosts {
+    _$feedPostsAtom.reportRead();
+    return super.feedPosts;
+  }
+
+  @override
+  set feedPosts(ObservableList<PostModel> value) {
+    _$feedPostsAtom.reportWrite(value, super.feedPosts, () {
+      super.feedPosts = value;
+    });
+  }
+
   late final _$toggleLikeAsyncAction = AsyncAction(
     '_PostStore.toggleLike',
     context: context,
@@ -192,6 +210,7 @@ mixin _$PostStore on _PostStore, Store {
     String? location,
     File? selectedImage,
     Uint8List? webImage,
+    bool removeImage = false,
   }) {
     return _$editPostAsyncAction.run(
       () => super.editPost(
@@ -200,6 +219,7 @@ mixin _$PostStore on _PostStore, Store {
         location: location,
         selectedImage: selectedImage,
         webImage: webImage,
+        removeImage: removeImage,
       ),
     );
   }
@@ -214,6 +234,23 @@ mixin _$PostStore on _PostStore, Store {
     return _$deletePostAsyncAction.run(() => super.deletePost(postId));
   }
 
+  late final _$_PostStoreActionController = ActionController(
+    name: '_PostStore',
+    context: context,
+  );
+
+  @override
+  void setFeed(List<PostModel> posts) {
+    final _$actionInfo = _$_PostStoreActionController.startAction(
+      name: '_PostStore.setFeed',
+    );
+    try {
+      return super.setFeed(posts);
+    } finally {
+      _$_PostStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''
@@ -222,7 +259,8 @@ error: ${error},
 likedPosts: ${likedPosts},
 postLikes: ${postLikes},
 savedPosts: ${savedPosts},
-postSaves: ${postSaves}
+postSaves: ${postSaves},
+feedPosts: ${feedPosts}
     ''';
   }
 }

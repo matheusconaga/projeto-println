@@ -24,9 +24,6 @@ class ApiService {
 
             final token = await user.getIdToken();
 
-            print("TOKEN ENVIADO:");
-            print(token);
-
             options.headers["Authorization"] = "Bearer $token";
 
           }

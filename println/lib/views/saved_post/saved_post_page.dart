@@ -93,6 +93,7 @@ class _SavedPostsPageState extends State<SavedPostsPage> {
                   post: post,
                   postStore: postStore,
                   currentUserId: currentUserId,
+                  authStore: authStore,
                 );
               },
             ),

@@ -36,6 +36,9 @@ abstract class _PostStore with Store {
   @observable
   ObservableMap<String, int> postSaves = ObservableMap<String, int>();
 
+  @observable
+  ObservableList<PostModel> feedPosts = ObservableList<PostModel>();
+
   // LIKES
   @action
   Future<void> toggleLike(String postId, String userId) async {
@@ -139,30 +142,33 @@ abstract class _PostStore with Store {
   }
 
   @action
+  void setFeed(List<PostModel> posts) {
+    feedPosts.clear();
+    feedPosts.addAll(posts);
+  }
+
+
+  @action
   Future<void> editPost({
     required String postId,
     required String content,
     String? location,
     File? selectedImage,
     Uint8List? webImage,
+    bool removeImage = false,
   }) async {
+
     loading = true;
     try {
-      MultipartFile? imageFile;
-      if (kIsWeb && webImage != null) {
-        imageFile = MultipartFile.fromBytes(webImage, filename: "post.jpg");
-      }
-      if (!kIsWeb && selectedImage != null) {
-        imageFile = await MultipartFile.fromFile(selectedImage.path);
-      }
+      await repository.editPost(
+        postId: postId,
+        content: content,
+        location: location,
+        photo: selectedImage,
+        webPhoto: webImage,
+        removeImage: removeImage,
+      );
 
-      FormData data = FormData.fromMap({
-        "content": content,
-        "location": location,
-        if (imageFile != null) "image": imageFile,
-      });
-
-      await api.editPost(postId, data);
     } catch (e) {
       error = "Erro ao editar post";
     } finally {
@@ -174,13 +180,22 @@ abstract class _PostStore with Store {
   Future<void> deletePost(String postId) async {
     loading = true;
     try {
+
       await api.deletePost(postId);
+
+      // feedPosts.removeWhere((p) => p.id == postId);
+
       likedPosts.remove(postId);
       postLikes.remove(postId);
+      savedPosts.remove(postId);
+      postSaves.remove(postId);
+
     } catch (e) {
       error = "Erro ao deletar post";
     } finally {
       loading = false;
     }
   }
+
+
 }
