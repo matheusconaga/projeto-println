@@ -44,7 +44,6 @@ O projeto foi pensado para dispositivos Android, testado em **Galaxy A56 com And
 ## ⚡ Funcionalidades Principais
 
 - Cadastro e login de usuários
-- Verificação de e-mail
 - Criação e edição de posts
 - Exclusão de posts pelo autor
 - Feed principal de publicações
