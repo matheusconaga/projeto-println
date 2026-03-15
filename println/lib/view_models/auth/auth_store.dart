@@ -100,6 +100,32 @@ abstract class _AuthStore with Store {
   }
 
   @action
+  Future<void> updateUser({
+    required String userId,
+    String? username,
+    File? photo,
+    Uint8List? webPhoto,
+    bool removePhoto = false,
+  }) async {
+    if (userId.isEmpty) return;
+
+    loading = true;
+    try {
+      final updatedUser = await _userRepository.updateUser(
+        userId,
+        username,
+        photo,
+        webPhoto,
+        removePhoto: removePhoto,
+      );
+
+      user = updatedUser;
+    } finally {
+      loading = false;
+    }
+  }
+
+  @action
   Future logout() async {
     loading = true;
     try {

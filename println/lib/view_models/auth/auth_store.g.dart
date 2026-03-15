@@ -105,6 +105,30 @@ mixin _$AuthStore on _AuthStore, Store {
     return _$loginAsyncAction.run(() => super.login(email, password));
   }
 
+  late final _$updateUserAsyncAction = AsyncAction(
+    '_AuthStore.updateUser',
+    context: context,
+  );
+
+  @override
+  Future<void> updateUser({
+    required String userId,
+    String? username,
+    File? photo,
+    Uint8List? webPhoto,
+    bool removePhoto = false,
+  }) {
+    return _$updateUserAsyncAction.run(
+      () => super.updateUser(
+        userId: userId,
+        username: username,
+        photo: photo,
+        webPhoto: webPhoto,
+        removePhoto: removePhoto,
+      ),
+    );
+  }
+
   late final _$logoutAsyncAction = AsyncAction(
     '_AuthStore.logout',
     context: context,

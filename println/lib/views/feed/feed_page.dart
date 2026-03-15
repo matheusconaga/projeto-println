@@ -80,6 +80,7 @@ class _FeedPageState extends State<FeedPage> {
       context: context,
       builder: (_) => UserMenuDialog(
         themeStore: themeStore,
+        feedStore: feedStore,
         onEditProfile: () {
           Navigator.pop(context);
         },

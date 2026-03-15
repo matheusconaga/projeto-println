@@ -37,7 +37,7 @@ class UserService:
         return self.repo.get_by_email(db, email)
     
     
-    def update_user(self, db: Session, user_id: str, username: str = None, photo: str = None):
+    def update_user(self, db: Session, user_id: str, username: str = None, photo: str = None, remove_photo: bool = False):
 
         user = self.repo.get_by_id(db, user_id)
 
@@ -56,7 +56,9 @@ class UserService:
 
             user.username = username.lower()
 
-        if photo:
+        if remove_photo:
+            user.photo = ""
+        elif photo:
             user.photo = photo
 
         db.commit()

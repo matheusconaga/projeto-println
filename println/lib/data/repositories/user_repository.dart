@@ -56,4 +56,36 @@ class UserRepository {
       return null;
     }
   }
+
+  Future<UserModel> updateUser(
+      String userId,
+      String? username,
+      File? photo,
+      Uint8List? webPhoto, {
+        bool removePhoto = false,
+      }) async {
+    MultipartFile? multipartPhoto;
+
+    if (photo != null) {
+      multipartPhoto = await MultipartFile.fromFile(photo.path, filename: 'profile.jpg');
+    }
+
+    if (webPhoto != null) {
+      multipartPhoto = MultipartFile.fromBytes(webPhoto, filename: 'profile.jpg');
+    }
+
+    final formData = FormData.fromMap({
+      if (username != null) "username": username,
+      if (multipartPhoto != null) "photo": multipartPhoto,
+      "remove_photo": removePhoto.toString(),
+    });
+
+    final response = await api.dio.put(
+      "/users/update/$userId",
+      data: formData,
+    );
+
+    return UserModel.fromJson(response.data);
+  }
+
 }

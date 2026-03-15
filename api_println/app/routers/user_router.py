@@ -69,6 +69,7 @@ async def update_user(
     user_id: str,
     username: str = Form(None),
     photo: UploadFile | None = File(None),
+    remove_photo: bool = Form(False), 
     db: Session = Depends(get_db)
 ):
 
@@ -77,7 +78,7 @@ async def update_user(
     if photo:
         photo_url = upload_image(photo.file)
 
-    user = service.update_user(db, user_id, username, photo_url)
+    user = service.update_user(db, user_id, username, photo_url, remove_photo)
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
