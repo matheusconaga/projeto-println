@@ -165,7 +165,7 @@ mixin _$PostStore on _PostStore, Store {
   @override
   Future<void> initializeLikes(
     String currentUserId, {
-    List<PostModel>? feedPosts,
+    required List<PostModel> feedPosts,
   }) {
     return _$initializeLikesAsyncAction.run(
       () => super.initializeLikes(currentUserId, feedPosts: feedPosts),

@@ -2,21 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:println/view_models/auth/auth_store.dart';
 import 'package:println/view_models/post/post_store.dart';
-import 'package:println/view_models/theme/theme_store.dart';
 import 'package:println/widgets/custom_app_bar.dart';
 import 'package:println/widgets/post_card.dart';
-import 'package:println/core/services/post_service.dart';
-import 'package:println/core/services/api_service.dart';
+import 'package:provider/provider.dart';
 
 class SavedPostsPage extends StatefulWidget {
-  final AuthStore authStore;
-  final ThemeStore themeStore;
 
-  const SavedPostsPage({
-    super.key,
-    required this.authStore,
-    required this.themeStore,
-  });
+
+  const SavedPostsPage({super.key});
 
   @override
   State<SavedPostsPage> createState() => _SavedPostsPageState();
@@ -24,21 +17,21 @@ class SavedPostsPage extends StatefulWidget {
 
 class _SavedPostsPageState extends State<SavedPostsPage> {
   late final AuthStore authStore;
-  late final ThemeStore themeStore;
   late final PostStore postStore;
+  bool _initialized = false;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    authStore = widget.authStore;
-    themeStore = widget.themeStore;
+    if (!_initialized) {
+      authStore = context.read<AuthStore>();
+      postStore = context.read<PostStore>();
 
-    final apiService = PostService(ApiService());
+      _loadSavedPosts();
 
-    postStore = PostStore(apiService);
-
-    _loadSavedPosts();
+      _initialized = true;
+    }
   }
 
   Future<void> _loadSavedPosts() async {
@@ -62,6 +55,9 @@ class _SavedPostsPageState extends State<SavedPostsPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final authStore = context.watch<AuthStore>();
+    final postStore = context.watch<PostStore>();
 
     final user = authStore.user;
 
@@ -96,13 +92,9 @@ class _SavedPostsPageState extends State<SavedPostsPage> {
               itemCount: postStore.savedPostsList.length,
               itemBuilder: (context, index) {
                 final post = postStore.savedPostsList[index];
-                final currentUserId = authStore.user!.id;
 
                 return PostCard(
                   post: post,
-                  postStore: postStore,
-                  currentUserId: currentUserId,
-                  authStore: authStore,
                 );
               },
             ),

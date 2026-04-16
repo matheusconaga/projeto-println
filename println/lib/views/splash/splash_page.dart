@@ -1,28 +1,33 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
+import 'package:provider/provider.dart';
+
 import 'package:println/core/routes/app_routes.dart';
 import 'package:println/view_models/auth/auth_store.dart';
 
 class SplashPage extends StatefulWidget {
-  final AuthStore authStore;
-
-  const SplashPage({super.key, required this.authStore});
+  const SplashPage({super.key});
 
   @override
   State<SplashPage> createState() => _SplashPageState();
 }
 
 class _SplashPageState extends State<SplashPage> {
-  late final AuthStore authStore;
+  late AuthStore authStore;
+
   bool _hasNavigated = false;
+  bool _initialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    authStore = widget.authStore;
-    _loadUser();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (!_initialized) {
+      authStore = context.read<AuthStore>();
+      _loadUser();
+      _initialized = true;
+    }
   }
 
   Future<void> _loadUser() async {
@@ -30,41 +35,47 @@ class _SplashPageState extends State<SplashPage> {
 
     if (authStore.isLogged && authStore.user == null) {
       final firebaseUser = authStore.getFirebaseUser();
+
       if (firebaseUser != null) {
-        final backendUser = await authStore.waitForUserInBackend(firebaseUser.uid, timeout: Duration(seconds: 10));
+        final backendUser = await authStore.waitForUserInBackend(
+          firebaseUser.uid,
+          timeout: const Duration(seconds: 10),
+        );
+
         if (backendUser != null) {
           runInAction(() => authStore.user = backendUser);
         }
       }
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _navigate();
-    });
+    _navigate();
   }
 
   void _navigate() {
     if (_hasNavigated) return;
     _hasNavigated = true;
 
-    final route = authStore.isLogged ? AppRoutes.home : AppRoutes.login;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.pushNamedAndRemoveUntil(context, route, (route) => false);
-    });
+    final route = authStore.isLogged
+        ? AppRoutes.home
+        : AppRoutes.login;
+
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      route,
+          (route) => false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final authStore = context.watch<AuthStore>();
+
     return Observer(
       builder: (_) {
         if (authStore.loading) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
-        }
-
-        if (!_hasNavigated && (authStore.user != null || !authStore.isLogged)) {
-          _navigate();
         }
 
         return const Scaffold(

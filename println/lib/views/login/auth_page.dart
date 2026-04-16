@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
-
+import 'package:println/view_models/auth/auth_store.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -13,18 +14,19 @@ import 'package:println/core/validators/validators.dart';
 import 'package:println/widgets/app_button.dart';
 import 'package:println/widgets/app_link.dart';
 import 'package:println/widgets/form_input.dart';
-import '../../view_models/auth/auth_store.dart';
 
 class AuthPage extends StatefulWidget {
-  final AuthStore authStore;
-  const AuthPage({super.key, required this.authStore});
+  const AuthPage({super.key});
 
   @override
   State<AuthPage> createState() => _AuthPageState();
 }
 
 class _AuthPageState extends State<AuthPage> {
-  late final AuthStore authStore;
+
+  late AuthStore authStore;
+  bool _initialized = false;
+
   final _formKey = GlobalKey<FormState>();
 
   bool emailChecked = false;
@@ -43,10 +45,14 @@ class _AuthPageState extends State<AuthPage> {
   final TextEditingController confirmPasswordController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    authStore = widget.authStore;
-    _resetFormState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (!_initialized) {
+      authStore = context.read<AuthStore>();
+      _resetFormState();
+      _initialized = true;
+    }
   }
 
   void _resetFormState() {

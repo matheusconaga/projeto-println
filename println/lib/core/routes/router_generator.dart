@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:println/core/routes/app_routes.dart';
-import 'package:println/view_models/auth/auth_store.dart';
-import 'package:println/view_models/theme/theme_store.dart';
 import 'package:println/views/feed/feed_page.dart';
 import 'package:println/views/login/auth_page.dart';
 import 'package:println/views/post/post_details_page.dart';
@@ -11,18 +9,16 @@ import 'package:println/views/splash/splash_page.dart';
 
 
 class RouteGenerator{
-  static final AuthStore _authStore = AuthStore();
-  static final ThemeStore _themeStore = ThemeStore();
 
   static Route<dynamic> generateRoute(RouteSettings settings){
 
     switch (settings.name) {
       case AppRoutes.splashPage:
-        return MaterialPageRoute(builder: (_) => SplashPage(authStore: _authStore));
+        return MaterialPageRoute(builder: (_) => SplashPage());
       case AppRoutes.login:
-        return MaterialPageRoute(builder: (_) => AuthPage(authStore: _authStore));
+        return MaterialPageRoute(builder: (_) => AuthPage());
       case AppRoutes.home:
-        return MaterialPageRoute(builder: (_) => FeedPage(authStore: _authStore, themeStore: _themeStore,));
+        return MaterialPageRoute(builder: (_) => FeedPage());
 
       case AppRoutes.createPost:
 
@@ -38,15 +34,13 @@ class RouteGenerator{
         );
 
       case AppRoutes.savedPosts:
-        return MaterialPageRoute(builder: (_) => SavedPostsPage(authStore: _authStore, themeStore: _themeStore,));
+        return MaterialPageRoute(builder: (_) => SavedPostsPage());
       case AppRoutes.detailsPost:
 
         final args = settings.arguments as Map;
         return MaterialPageRoute(
           builder: (_) => PostDetailsPage(
             postId: args["postId"],
-            postStore: args["postStore"],
-            authStore: _authStore,
           ),
         );
 

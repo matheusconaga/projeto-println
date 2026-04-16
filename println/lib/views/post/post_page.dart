@@ -1,19 +1,16 @@
 import 'dart:io';
-import 'dart:typed_data';
-
+import 'package:println/view_models/post/post_store.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:println/core/services/post_service.dart';
 
 import 'package:println/core/theme/app_spacing.dart';
 import 'package:println/core/theme/app_text_styles.dart';
 import 'package:println/core/theme/app_colors.dart';
 import 'package:println/core/validators/validators.dart';
 
-import 'package:println/view_models/post/post_store.dart';
-import 'package:println/core/services/api_service.dart';
 import 'package:println/widgets/form_input.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -55,13 +52,16 @@ class _PostPageState extends State<PostPage> {
 
   late PostStore postStore;
 
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    postStore = context.read<PostStore>();
+  }
+
   @override
   void initState() {
     super.initState();
-
-    postStore = PostStore(
-      PostService(ApiService()),
-    );
 
     contentController.text = widget.initialContent ?? "";
     locationController.text = widget.initialLocation ?? "";

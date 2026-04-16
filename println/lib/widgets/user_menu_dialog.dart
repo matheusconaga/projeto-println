@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:println/view_models/auth/auth_store.dart';
+import 'package:println/view_models/feed/feed_store.dart';
+import 'package:println/view_models/theme/theme_store.dart';
 import 'dart:io';
 import 'dart:typed_data';
-
-import 'package:println/view_models/auth/auth_store.dart';
-import 'package:println/view_models/theme/theme_store.dart';
-import 'package:println/view_models/feed/feed_store.dart';
+import 'package:provider/provider.dart';
 
 class UserMenuDialog extends StatelessWidget {
-  final ThemeStore themeStore;
-  final AuthStore authStore;
-  final FeedStore feedStore;
   final VoidCallback onEditProfile;
   final VoidCallback onLogout;
 
@@ -20,13 +17,14 @@ class UserMenuDialog extends StatelessWidget {
     super.key,
     required this.onEditProfile,
     required this.onLogout,
-    required this.themeStore,
-    required this.authStore,
-    required this.feedStore,
   });
 
   @override
   Widget build(BuildContext context) {
+    final authStore = context.read<AuthStore>();
+    final themeStore = context.read<ThemeStore>();
+    final feedStore = context.read<FeedStore>();
+
     return SimpleDialog(
       contentPadding: const EdgeInsets.all(16),
       children: [
@@ -37,6 +35,8 @@ class UserMenuDialog extends StatelessWidget {
 
             return Column(
               children: [
+
+                /// USER INFO
                 CircleAvatar(
                   radius: 40,
                   backgroundImage: user.photo != null
@@ -46,26 +46,57 @@ class UserMenuDialog extends StatelessWidget {
                       ? const Icon(Icons.person, size: 40)
                       : null,
                 ),
+
                 const SizedBox(height: 12),
+
                 Text(
                   user.username,
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold),
                 ),
+
                 const SizedBox(height: 4),
+
                 Text(
                   user.email ?? "",
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
+
                 const Divider(height: 32),
+
+                /// 🌗 THEME SWITCH
+                Observer(
+                  builder: (_) => ListTile(
+                    leading: Icon(
+                      themeStore.isDarkMode
+                          ? Icons.dark_mode
+                          : Icons.light_mode,
+                    ),
+                    title: Text(
+                      themeStore.isDarkMode
+                          ? "Modo escuro ativado"
+                          : "Modo claro ativado",
+                    ),
+                    trailing: Switch(
+                      value: themeStore.isDarkMode,
+                      onChanged: (value) {
+                        themeStore.toggleTheme(value);
+                      },
+                    ),
+                  ),
+                ),
+
+                /// EDIT PROFILE
                 ListTile(
                   leading: const Icon(Icons.edit),
                   title: const Text("Editar Perfil"),
                   onTap: () {
                     Navigator.pop(context);
-                    _showEditProfileDialog(context, user);
+                    _showEditProfileDialog(context, user, authStore, feedStore);
                   },
                 ),
+
+                /// LOGOUT
                 ListTile(
                   leading: const Icon(Icons.logout, color: Colors.red),
                   title: const Text("Sair", style: TextStyle(color: Colors.red)),
@@ -87,6 +118,7 @@ class UserMenuDialog extends StatelessWidget {
                         ],
                       ),
                     );
+
                     if (confirmed ?? false) {
                       onLogout();
                     }
@@ -100,8 +132,14 @@ class UserMenuDialog extends StatelessWidget {
     );
   }
 
-  void _showEditProfileDialog(BuildContext context, user) {
+  void _showEditProfileDialog(
+      BuildContext context,
+      user,
+      AuthStore authStore,
+      FeedStore feedStore,
+      ) {
     final usernameController = TextEditingController(text: user.username);
+
     File? selectedImage;
     Uint8List? webImage;
     bool removeImage = false;
@@ -115,6 +153,8 @@ class UserMenuDialog extends StatelessWidget {
           content: SingleChildScrollView(
             child: Column(
               children: [
+
+                /// IMAGE
                 GestureDetector(
                   onTap: () async {
                     final image = await picker.pickImage(source: ImageSource.gallery);
@@ -151,7 +191,9 @@ class UserMenuDialog extends StatelessWidget {
                         : null,
                   ),
                 ),
+
                 const SizedBox(height: 8),
+
                 if ((user.photo != null && !removeImage) ||
                     selectedImage != null ||
                     webImage != null)
@@ -165,7 +207,9 @@ class UserMenuDialog extends StatelessWidget {
                     },
                     child: const Text("Remover imagem"),
                   ),
+
                 const SizedBox(height: 12),
+
                 TextField(
                   controller: usernameController,
                   decoration: const InputDecoration(labelText: "Username"),
@@ -174,18 +218,23 @@ class UserMenuDialog extends StatelessWidget {
             ),
           ),
           actions: [
+
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text("Cancelar"),
             ),
+
             Observer(
               builder: (_) {
                 return TextButton(
                   onPressed: authStore.loading
                       ? null
                       : () async {
-                    File? finalImage = removeImage ? null : selectedImage;
-                    Uint8List? finalWebImage = removeImage ? null : webImage;
+                    File? finalImage =
+                    removeImage ? null : selectedImage;
+
+                    Uint8List? finalWebImage =
+                    removeImage ? null : webImage;
 
                     await authStore.updateUser(
                       userId: user.id,
@@ -196,13 +245,15 @@ class UserMenuDialog extends StatelessWidget {
                     );
 
                     await feedStore.loadFeed();
+
                     Navigator.pop(context);
                   },
                   child: authStore.loading
                       ? const SizedBox(
                     height: 20,
                     width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child:
+                    CircularProgressIndicator(strokeWidth: 2),
                   )
                       : const Text("Salvar"),
                 );
