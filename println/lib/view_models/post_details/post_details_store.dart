@@ -1,4 +1,6 @@
 import 'package:mobx/mobx.dart';
+import 'package:println/core/services/api_service.dart';
+import 'package:println/core/services/comment_service.dart';
 import 'package:println/core/services/post_service.dart';
 import 'package:println/models/comment_model.dart';
 import 'package:println/models/post_model.dart';
@@ -17,7 +19,12 @@ abstract class _PostDetailsStore with Store {
   PostModel? post;
 
   @observable
-  ObservableList<CommentModel> comments = ObservableList();
+  ObservableList<CommentModel> comments = ObservableList<CommentModel>();
+
+  @observable
+  bool sendingComment = false;
+
+  final CommentService commentService = CommentService(ApiService());
 
   @observable
   bool loading = false;
@@ -52,4 +59,44 @@ abstract class _PostDetailsStore with Store {
 
     loading = false;
   }
+
+  @action
+  Future<void> addComment(String userId, String postId, String content) async {
+    sendingComment = true;
+
+    try {
+      final newComment = await commentService.createComment(
+        userId: userId,
+        postId: postId,
+        content: content,
+      );
+
+      comments.insert(0, newComment);
+
+    } finally {
+      sendingComment = false;
+    }
+  }
+
+  @action
+  Future<void> editComment(String commentId, String userId, String content) async {
+    await commentService.editComment(
+      commentId: commentId,
+      userId: userId,
+      content: content,
+    );
+
+    await loadPost(post!.id);
+  }
+
+  @action
+  Future<void> deleteComment(String commentId, String userId) async {
+    await commentService.deleteComment(
+      commentId: commentId,
+      userId: userId,
+    );
+
+    comments.removeWhere((c) => c.id == commentId);
+  }
+
 }

@@ -45,6 +45,24 @@ mixin _$PostDetailsStore on _PostDetailsStore, Store {
     });
   }
 
+  late final _$sendingCommentAtom = Atom(
+    name: '_PostDetailsStore.sendingComment',
+    context: context,
+  );
+
+  @override
+  bool get sendingComment {
+    _$sendingCommentAtom.reportRead();
+    return super.sendingComment;
+  }
+
+  @override
+  set sendingComment(bool value) {
+    _$sendingCommentAtom.reportWrite(value, super.sendingComment, () {
+      super.sendingComment = value;
+    });
+  }
+
   late final _$loadingAtom = Atom(
     name: '_PostDetailsStore.loading',
     context: context,
@@ -91,11 +109,48 @@ mixin _$PostDetailsStore on _PostDetailsStore, Store {
     return _$loadPostAsyncAction.run(() => super.loadPost(postId));
   }
 
+  late final _$addCommentAsyncAction = AsyncAction(
+    '_PostDetailsStore.addComment',
+    context: context,
+  );
+
+  @override
+  Future<void> addComment(String userId, String postId, String content) {
+    return _$addCommentAsyncAction.run(
+      () => super.addComment(userId, postId, content),
+    );
+  }
+
+  late final _$editCommentAsyncAction = AsyncAction(
+    '_PostDetailsStore.editComment',
+    context: context,
+  );
+
+  @override
+  Future<void> editComment(String commentId, String userId, String content) {
+    return _$editCommentAsyncAction.run(
+      () => super.editComment(commentId, userId, content),
+    );
+  }
+
+  late final _$deleteCommentAsyncAction = AsyncAction(
+    '_PostDetailsStore.deleteComment',
+    context: context,
+  );
+
+  @override
+  Future<void> deleteComment(String commentId, String userId) {
+    return _$deleteCommentAsyncAction.run(
+      () => super.deleteComment(commentId, userId),
+    );
+  }
+
   @override
   String toString() {
     return '''
 post: ${post},
 comments: ${comments},
+sendingComment: ${sendingComment},
 loading: ${loading},
 error: ${error}
     ''';
