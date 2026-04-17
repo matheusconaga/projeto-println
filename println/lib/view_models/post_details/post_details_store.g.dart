@@ -99,14 +99,32 @@ mixin _$PostDetailsStore on _PostDetailsStore, Store {
     });
   }
 
+  late final _$editingCommentIdAtom = Atom(
+    name: '_PostDetailsStore.editingCommentId',
+    context: context,
+  );
+
+  @override
+  String? get editingCommentId {
+    _$editingCommentIdAtom.reportRead();
+    return super.editingCommentId;
+  }
+
+  @override
+  set editingCommentId(String? value) {
+    _$editingCommentIdAtom.reportWrite(value, super.editingCommentId, () {
+      super.editingCommentId = value;
+    });
+  }
+
   late final _$loadPostAsyncAction = AsyncAction(
     '_PostDetailsStore.loadPost',
     context: context,
   );
 
   @override
-  Future<void> loadPost(String postId) {
-    return _$loadPostAsyncAction.run(() => super.loadPost(postId));
+  Future<void> loadPost(String postId, PostStore postStore) {
+    return _$loadPostAsyncAction.run(() => super.loadPost(postId, postStore));
   }
 
   late final _$addCommentAsyncAction = AsyncAction(
@@ -115,9 +133,14 @@ mixin _$PostDetailsStore on _PostDetailsStore, Store {
   );
 
   @override
-  Future<void> addComment(String userId, String postId, String content) {
+  Future<void> addComment(
+    String userId,
+    String postId,
+    String content,
+    PostStore postStore,
+  ) {
     return _$addCommentAsyncAction.run(
-      () => super.addComment(userId, postId, content),
+      () => super.addComment(userId, postId, content, postStore),
     );
   }
 
@@ -139,9 +162,13 @@ mixin _$PostDetailsStore on _PostDetailsStore, Store {
   );
 
   @override
-  Future<void> deleteComment(String commentId, String userId) {
+  Future<void> deleteComment(
+    String commentId,
+    String userId,
+    PostStore postStore,
+  ) {
     return _$deleteCommentAsyncAction.run(
-      () => super.deleteComment(commentId, userId),
+      () => super.deleteComment(commentId, userId, postStore),
     );
   }
 
@@ -152,7 +179,8 @@ post: ${post},
 comments: ${comments},
 sendingComment: ${sendingComment},
 loading: ${loading},
-error: ${error}
+error: ${error},
+editingCommentId: ${editingCommentId}
     ''';
   }
 }

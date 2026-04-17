@@ -147,6 +147,24 @@ mixin _$PostStore on _PostStore, Store {
     });
   }
 
+  late final _$postCommentsAtom = Atom(
+    name: '_PostStore.postComments',
+    context: context,
+  );
+
+  @override
+  ObservableMap<String, int> get postComments {
+    _$postCommentsAtom.reportRead();
+    return super.postComments;
+  }
+
+  @override
+  set postComments(ObservableMap<String, int> value) {
+    _$postCommentsAtom.reportWrite(value, super.postComments, () {
+      super.postComments = value;
+    });
+  }
+
   late final _$toggleLikeAsyncAction = AsyncAction(
     '_PostStore.toggleLike',
     context: context,
@@ -292,7 +310,8 @@ postLikes: ${postLikes},
 savedPosts: ${savedPosts},
 postSaves: ${postSaves},
 feedPosts: ${feedPosts},
-savedPostsList: ${savedPostsList}
+savedPostsList: ${savedPostsList},
+postComments: ${postComments}
     ''';
   }
 }

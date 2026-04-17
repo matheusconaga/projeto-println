@@ -1,4 +1,5 @@
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:println/core/routes/app_routes.dart';
 import 'package:println/core/theme/app_colors.dart';
 import 'package:println/core/utils/responsive.dart';
 import 'package:println/models/post_model.dart';
@@ -30,9 +31,9 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     final postStore = context.read<PostStore>();
     final authStore = context.read<AuthStore>();
-
 
     final feedStore = context.read<FeedStore?>();
 
@@ -135,7 +136,7 @@ class PostCard extends StatelessWidget {
                                   onPressed: () async {
                                     await postStore.deletePost(post.id);
 
-                                    /// ✅ Remove do feed (se existir)
+                                    /// Remove do feed (se existir)
                                     feedStore?.posts.removeWhere((p) => p.id == post.id);
 
                                     Navigator.pop(context); // fecha dialog
@@ -219,27 +220,21 @@ class PostCard extends StatelessWidget {
                   ),
 
                   /// COMMENT
-                  _ActionButton(
-                    icon: Icons.chat_bubble_outline,
-                    label: "Comentar",
-                    count: post.comments,
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          title: const Text("Atenção"),
-                          content: const Text(
-                            "Funcionalidade de comentários ainda não implementada.",
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("OK"),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                  Observer(
+                      builder: (_) => _ActionButton(
+                        icon: Icons.chat_bubble_outline,
+                        label: "Comentar",
+                        count: postStore.postComments[post.id] ?? post.comments,
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.detailsPost,
+                            arguments: {
+                              "postId": post.id,
+                            },
+                          );
+                        },
+                      ),
                   ),
 
                   /// SAVE

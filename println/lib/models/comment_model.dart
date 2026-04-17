@@ -27,7 +27,14 @@ class CommentModel {
       updatedAt: json["updated_at"] != null
           ? DateTime.parse(json["updated_at"])
           : null,
-      user: UserModel.fromJson(json["user"]),
+      user: json["user"] != null
+          ? UserModel.fromJson(json["user"])
+          : UserModel(
+        id: "",
+        username: "Usuário",
+        photo: null,
+        email: null,
+      ),
     );
   }
 }
