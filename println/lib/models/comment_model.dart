@@ -25,7 +25,7 @@ class CommentModel {
       content: json["content"],
       createdAt: DateTime.parse(json["created_at"]).toLocal(),
       updatedAt: json["updated_at"] != null
-          ? DateTime.parse(json["updated_at"])
+          ? DateTime.parse(json["updated_at"]).toLocal()
           : null,
       user: json["user"] != null
           ? UserModel.fromJson(json["user"])

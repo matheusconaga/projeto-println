@@ -29,4 +29,4 @@ class Post(Base):
     saves = relationship("SavedPost", cascade="all, delete", passive_deletes=True)
 
     created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    updated_at = Column(DateTime, nullable=True)

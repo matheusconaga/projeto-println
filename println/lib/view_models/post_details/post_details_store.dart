@@ -4,6 +4,7 @@ import 'package:println/core/services/comment_service.dart';
 import 'package:println/core/services/post_service.dart';
 import 'package:println/models/comment_model.dart';
 import 'package:println/models/post_model.dart';
+import 'package:println/view_models/auth/auth_store.dart';
 import 'package:println/view_models/post/post_store.dart';
 
 part 'post_details_store.g.dart';
@@ -13,8 +14,9 @@ class PostDetailsStore = _PostDetailsStore with _$PostDetailsStore;
 abstract class _PostDetailsStore with Store {
 
   final PostService api;
+  final AuthStore authStore;
 
-  _PostDetailsStore(this.api);
+  _PostDetailsStore(this.api, this.authStore);
 
   @observable
   PostModel? post;
@@ -74,12 +76,14 @@ abstract class _PostDetailsStore with Store {
     final currentCount =
         postStore.postComments[postId] ?? post?.comments ?? 0;
 
+    final currentUser = authStore.user!;
+
     final tempComment = CommentModel(
       id: DateTime.now().toString(),
       content: content,
       createdAt: DateTime.now(),
       updatedAt: null,
-      user: post!.user!,
+      user: currentUser,
     );
 
     comments.insert(0, tempComment);

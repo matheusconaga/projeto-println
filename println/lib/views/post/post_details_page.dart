@@ -42,7 +42,10 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
       postStore = context.read<PostStore>();
       authStore = context.read<AuthStore>();
 
-      detailsStore = PostDetailsStore(PostService(ApiService()));
+      detailsStore = PostDetailsStore(PostService(
+          ApiService()),
+      authStore
+      );
       detailsStore.loadPost(widget.postId, postStore);
 
       _initialized = true;

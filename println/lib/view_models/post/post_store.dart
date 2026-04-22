@@ -212,6 +212,7 @@ abstract class _PostStore with Store {
   }) async {
 
     loading = true;
+
     try {
       await repository.editPost(
         postId: postId,
@@ -221,6 +222,25 @@ abstract class _PostStore with Store {
         webPhoto: webImage,
         removeImage: removeImage,
       );
+
+      final index = feedPosts.indexWhere((p) => p.id == postId);
+
+      if (index != -1) {
+        final old = feedPosts[index];
+
+        feedPosts[index] = PostModel(
+          id: old.id,
+          content: content,
+          imageUrl: removeImage ? null : old.imageUrl,
+          location: location,
+          likes: old.likes,
+          comments: old.comments,
+          saves: old.saves,
+          createdAt: old.createdAt,
+          updatedAt: DateTime.now(),
+          user: old.user,
+        );
+      }
 
     } catch (e) {
       error = "Erro ao editar post";
@@ -236,7 +256,6 @@ abstract class _PostStore with Store {
 
       await api.deletePost(postId);
 
-      // feedPosts.removeWhere((p) => p.id == postId);
 
       likedPosts.remove(postId);
       postLikes.remove(postId);

@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.models.comment import Comment
 from app.models.post import Post
 from sqlalchemy.sql import func
@@ -20,9 +20,13 @@ class CommentRepository:
         post.comments_count += 1
 
         db.commit()
-        db.refresh(comment)
 
-        return comment
+        return (
+            db.query(Comment)
+            .options(joinedload(Comment.user))
+            .filter(Comment.id == comment.id)
+            .first()
+       )
 
 
     def get_comment(self, db: Session, comment_id: str):
@@ -36,9 +40,13 @@ class CommentRepository:
         comment.updated_at = func.now()
 
         db.commit()
-        db.refresh(comment)
 
-        return comment
+        return (
+            db.query(Comment)
+            .options(joinedload(Comment.user))
+            .filter(Comment.id == comment.id)
+            .first()
+        )
 
 
     def delete_comment(self, db: Session, comment: Comment):
