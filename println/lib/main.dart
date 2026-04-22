@@ -55,9 +55,7 @@ class _MyAppState extends State<MyApp> {
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
 
-        themeMode: themeStore.isDarkMode
-            ? ThemeMode.dark
-            : ThemeMode.light,
+        themeMode: themeStore.themeMode,
 
         initialRoute: AppRoutes.splashPage,
         onGenerateRoute: RouteGenerator.generateRoute,

@@ -66,24 +66,26 @@ class UserMenuDialog extends StatelessWidget {
 
                 /// 🌗 THEME SWITCH
                 Observer(
-                  builder: (_) => ListTile(
-                    leading: Icon(
-                      themeStore.isDarkMode
-                          ? Icons.dark_mode
-                          : Icons.light_mode,
-                    ),
-                    title: Text(
-                      themeStore.isDarkMode
-                          ? "Modo escuro ativado"
-                          : "Modo claro ativado",
-                    ),
-                    trailing: Switch(
-                      value: themeStore.isDarkMode,
-                      onChanged: (value) {
-                        themeStore.toggleTheme(value);
-                      },
-                    ),
-                  ),
+                  builder: (_) {
+                    final isDark = themeStore.isDark(context);
+
+                    return ListTile(
+                      leading: Icon(
+                        isDark ? Icons.dark_mode : Icons.light_mode,
+                      ),
+                      title: Text(
+                        isDark ? "Modo escuro ativado" : "Modo claro ativado",
+                      ),
+                      trailing: Switch(
+                        value: isDark,
+                        onChanged: (value) {
+                          themeStore.setTheme(
+                            value ? ThemeMode.dark : ThemeMode.light,
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
 
                 /// EDIT PROFILE
