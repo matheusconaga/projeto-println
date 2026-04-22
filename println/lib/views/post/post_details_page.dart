@@ -25,8 +25,9 @@ class PostDetailsPage extends StatefulWidget {
 }
 
 class _PostDetailsPageState extends State<PostDetailsPage> {
+  late TextEditingController commentController;
 
-  late PostDetailsStore store;
+  late PostDetailsStore detailsStore;
   late PostStore postStore;
   late AuthStore authStore;
 
@@ -41,6 +42,9 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
       postStore = context.read<PostStore>();
       authStore = context.read<AuthStore>();
 
+      detailsStore = PostDetailsStore(PostService(ApiService()));
+      detailsStore.loadPost(widget.postId, postStore);
+
       _initialized = true;
     }
   }
@@ -48,14 +52,17 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
   @override
   void initState() {
     super.initState();
+    commentController = TextEditingController();
+  }
 
-    store = PostDetailsStore(PostService(ApiService()));
-    store.loadPost(widget.postId);
+  @override
+  void dispose() {
+    commentController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final commentController = TextEditingController();
 
     return PopScope(
 
@@ -76,11 +83,11 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
           body: Observer(
             builder: (_) {
 
-              if (store.loading) {
+              if (detailsStore.loading) {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (store.post == null) {
+              if (detailsStore.post == null) {
                 return const Center(child: Text("Post não encontrado"));
               }
 
@@ -93,7 +100,7 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                         children: [
 
                           PostCard(
-                            post: store.post!,
+                            post: detailsStore.post!,
                             showOwnerActions: true,
 
                             onEdit: () async {
@@ -101,15 +108,15 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                 context,
                                 AppRoutes.createPost,
                                 arguments: {
-                                  "postId": store.post!.id,
-                                  "content": store.post!.content,
-                                  "location": store.post!.location,
-                                  "imageUrl": store.post!.imageUrl,
+                                  "postId": detailsStore.post!.id,
+                                  "content": detailsStore.post!.content,
+                                  "location": detailsStore.post!.location,
+                                  "imageUrl": detailsStore.post!.imageUrl,
                                 },
                               );
 
                               if (result == true) {
-                                await store.loadPost(widget.postId);
+                                await detailsStore.loadPost(widget.postId, postStore);
                                 postEdited = true;
                               }
                             },
@@ -117,7 +124,7 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
 
                           const Divider(),
 
-                          ...store.comments.map((c) {
+                          ...detailsStore.comments.map((c) {
                             final isOwner = c.user.id == authStore.user?.id;
 
                             return ListTile(
@@ -160,13 +167,15 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                 ],
                                 onSelected: (value) async {
                                   if (value == "edit") {
-                                    _editCommentDialog(context, c);
+                                    commentController.text = c.content;
+                                    detailsStore.editingCommentId = c.id;
                                   }
 
                                   if (value == "delete") {
-                                    await store.deleteComment(
+                                    await detailsStore.deleteComment(
                                       c.id,
                                       authStore.user!.id,
+                                      postStore,
                                     );
                                   }
                                 },
@@ -183,15 +192,28 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                   _CommentInput(
                     controller: commentController,
                     onSend: () async {
-                      if (commentController.text.trim().isEmpty) return;
-
-                      await store.addComment(
-                        authStore.user!.id,
-                        widget.postId,
-                        commentController.text,
-                      );
+                      final text = commentController.text.trim();
+                      if (text.isEmpty) return;
 
                       commentController.clear();
+
+                      if (detailsStore.editingCommentId != null) {
+                        await detailsStore.editComment(
+                          detailsStore.editingCommentId!,
+                          authStore.user!.id,
+                          text,
+                        );
+
+                        detailsStore.editingCommentId = null;
+
+                      } else {
+                        await detailsStore.addComment(
+                          authStore.user!.id,
+                          widget.postId,
+                          text,
+                          postStore,
+                        );
+                      }
                     },
                   ),
                 ],

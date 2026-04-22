@@ -42,6 +42,9 @@ abstract class _PostStore with Store {
   @observable
   ObservableList<PostModel> savedPostsList = ObservableList<PostModel>();
 
+  @observable
+  ObservableMap<String, int> postComments = ObservableMap<String, int>();
+
   // LIKES
   @action
   Future<void> toggleLike(String postId, String userId) async {
@@ -83,6 +86,7 @@ abstract class _PostStore with Store {
       for (var post in feedPosts) {
         likedPosts[post.id] = likedSet.contains(post.id);
         postLikes[post.id] = post.likes;
+        postComments[post.id] = post.comments;
       }
     } catch (e) {
       error = "Erro ao carregar likes do usuário";
