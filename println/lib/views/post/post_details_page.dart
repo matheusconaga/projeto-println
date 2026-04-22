@@ -105,6 +105,7 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           PostCard(
                             post: detailsStore.post!,
                             showOwnerActions: true,
+                            disableCommentNavigation: true,
 
                             onEdit: () async {
                               final result = await Navigator.pushNamed(

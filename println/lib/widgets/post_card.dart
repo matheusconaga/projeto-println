@@ -20,6 +20,7 @@ class PostCard extends StatelessWidget {
   final VoidCallback? onTap;
   final bool showOwnerActions;
   final Future<void> Function()? onEdit;
+  final bool disableCommentNavigation;
 
   const PostCard({
     super.key,
@@ -27,6 +28,7 @@ class PostCard extends StatelessWidget {
     this.showOwnerActions = false,
     this.onEdit,
     this.onTap,
+    this.disableCommentNavigation = false
   });
 
   @override
@@ -47,7 +49,7 @@ class PostCard extends StatelessWidget {
         showOwnerActions;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: disableCommentNavigation ? null : onTap,
       child: Card(
         elevation: 0,
         margin: const EdgeInsets.symmetric(
@@ -226,20 +228,22 @@ class PostCard extends StatelessWidget {
 
                   /// COMMENT
                   Observer(
-                      builder: (_) => _ActionButton(
-                        icon: Icons.chat_bubble_outline,
-                        label: "Comentar",
-                        count: postStore.postComments[post.id] ?? post.comments,
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.detailsPost,
-                            arguments: {
-                              "postId": post.id,
-                            },
-                          );
-                        },
-                      ),
+                    builder: (_) => _ActionButton(
+                      icon: Icons.chat_bubble_outline,
+                      label: "Comentar",
+                      count: postStore.postComments[post.id] ?? post.comments,
+                      onTap: disableCommentNavigation
+                          ? null
+                          : () {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.detailsPost,
+                          arguments: {
+                            "postId": post.id,
+                          },
+                        );
+                      },
+                    ),
                   ),
 
                   /// SAVE
@@ -269,31 +273,37 @@ class _ActionButton extends StatelessWidget {
   final String label;
   final int count;
   final VoidCallback? onTap;
+  final bool enabled;
 
   const _ActionButton({
     required this.icon,
     required this.label,
     required this.count,
     this.onTap,
+    this.enabled = true
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 20),
-              const SizedBox(width: 6),
-              Text(count.toString(), style: AppTextStyles.body2),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(label, style: AppTextStyles.caption),
-        ],
-      ),
+      onTap: enabled ? onTap : null,
+      behavior: HitTestBehavior.opaque,
+      child: Opacity(
+          opacity: enabled ? 1 : 0.5,
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 20),
+                const SizedBox(width: 6),
+                Text(count.toString(), style: AppTextStyles.body2),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(label, style: AppTextStyles.caption),
+          ],
+        ),
+      )
     );
   }
 }
