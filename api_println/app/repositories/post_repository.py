@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session,joinedload
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from app.models.post import Post
 from app.models.comment import Comment
 
@@ -72,6 +72,8 @@ class PostRepository:
         elif image_url is not None:
             post.image_url = image_url
 
+        post.updated_at = func.now()
+
         db.commit()
         db.refresh(post)
 
@@ -110,11 +112,14 @@ class PostRepository:
         if not post:
             return None
 
-        comments = sorted(
-            post.comments,
-            key=lambda x: x.created_at,
-            reverse=True
-        )[:limit_comments]
+        comments = (
+            db.query(Comment)
+            .options(joinedload(Comment.user))
+            .filter(Comment.post_id == post_id)
+            .order_by(Comment.created_at.desc())
+            .limit(limit_comments)
+            .all()
+        )
 
         comments_list = []
 
@@ -123,6 +128,7 @@ class PostRepository:
                 "id": comment.id,
                 "content": comment.content,
                 "created_at": comment.created_at,
+                "updated_at": comment.updated_at,
                 "user": {
                     "id": comment.user.id,
                     "username": comment.user.username,

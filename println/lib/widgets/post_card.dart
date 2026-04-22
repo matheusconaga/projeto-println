@@ -99,6 +99,11 @@ class PostCard extends StatelessWidget {
                               "• ${formatTime(post.createdAt)}",
                               style: AppTextStyles.caption,
                             ),
+                            if (post.isEdited)
+                              const Text(
+                                " • editado",
+                                style: TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
                           ],
                         ),
 

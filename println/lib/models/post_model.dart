@@ -10,6 +10,7 @@ class PostModel {
   final int comments;
   final int saves;
   final DateTime createdAt;
+  final DateTime? updatedAt;
   final UserModel user;
 
   PostModel({
@@ -22,7 +23,10 @@ class PostModel {
     required this.saves,
     required this.createdAt,
     required this.user,
+    this.updatedAt
   });
+
+  bool get isEdited => updatedAt != null;
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
     final userJson = json["user"] as Map<String, dynamic>?;
@@ -36,6 +40,9 @@ class PostModel {
       comments: json["comments_count"] ?? 0,
       saves: json["saves_count"] ?? 0,
       createdAt: DateTime.parse(json["created_at"]).toLocal(),
+      updatedAt: json["updated_at"] != null
+          ? DateTime.parse(json["updated_at"]).toLocal()
+          : null,
       user: userJson != null
           ? UserModel.fromJson(userJson)
           : UserModel(
