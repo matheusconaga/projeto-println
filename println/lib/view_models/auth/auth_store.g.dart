@@ -57,6 +57,39 @@ mixin _$AuthStore on _AuthStore, Store {
     });
   }
 
+  late final _$messageAtom = Atom(name: '_AuthStore.message', context: context);
+
+  @override
+  String? get message {
+    _$messageAtom.reportRead();
+    return super.message;
+  }
+
+  @override
+  set message(String? value) {
+    _$messageAtom.reportWrite(value, super.message, () {
+      super.message = value;
+    });
+  }
+
+  late final _$messageTypeAtom = Atom(
+    name: '_AuthStore.messageType',
+    context: context,
+  );
+
+  @override
+  String? get messageType {
+    _$messageTypeAtom.reportRead();
+    return super.messageType;
+  }
+
+  @override
+  set messageType(String? value) {
+    _$messageTypeAtom.reportWrite(value, super.messageType, () {
+      super.messageType = value;
+    });
+  }
+
   late final _$checkAuthAsyncAction = AsyncAction(
     '_AuthStore.checkAuth',
     context: context,
@@ -160,6 +193,18 @@ mixin _$AuthStore on _AuthStore, Store {
   );
 
   @override
+  void setMessage(String msg, String type) {
+    final _$actionInfo = _$_AuthStoreActionController.startAction(
+      name: '_AuthStore.setMessage',
+    );
+    try {
+      return super.setMessage(msg, type);
+    } finally {
+      _$_AuthStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   User? getFirebaseUser() {
     final _$actionInfo = _$_AuthStoreActionController.startAction(
       name: '_AuthStore.getFirebaseUser',
@@ -176,7 +221,9 @@ mixin _$AuthStore on _AuthStore, Store {
     return '''
 isLogged: ${isLogged},
 loading: ${loading},
-user: ${user}
+user: ${user},
+message: ${message},
+messageType: ${messageType}
     ''';
   }
 }

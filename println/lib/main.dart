@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:println/core/ui/app_messenger.dart';
 import 'package:provider/provider.dart';
 import 'package:println/core/providers/app_providers.dart';
 import 'package:println/core/routes/app_routes.dart';
@@ -50,6 +51,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return Observer(
       builder: (_) => MaterialApp(
+        scaffoldMessengerKey: AppMessenger.messengerKey,
         title: "PrintLn",
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,

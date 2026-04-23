@@ -17,7 +17,6 @@ class AppLink extends StatelessWidget {
         title,
         style: AppTextStyles.button.copyWith(
           color: theme.primaryColor,
-          decoration: TextDecoration.underline,
         ),
       ),
     );

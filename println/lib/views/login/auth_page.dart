@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:println/core/ui/app_loading.dart';
+import 'package:println/core/ui/app_snack_bar.dart';
 import 'package:println/view_models/auth/auth_store.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
@@ -26,6 +28,7 @@ class _AuthPageState extends State<AuthPage> {
 
   late AuthStore authStore;
   bool _initialized = false;
+  late ReactionDisposer _snackReaction;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -55,6 +58,36 @@ class _AuthPageState extends State<AuthPage> {
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final store = context.read<AuthStore>();
+
+      _snackReaction = reaction<String?>(
+            (_) => store.message,
+            (msg) {
+          if (msg == null) return;
+
+          switch (store.messageType) {
+            case "success":
+              AppSnackbar.success(msg);
+              break;
+            case "error":
+              AppSnackbar.error(msg);
+              break;
+            default:
+              AppSnackbar.info(msg);
+          }
+
+          store.message = null;
+        },
+      );
+    });
+  }
+
+
   void _resetFormState() {
     emailChecked = false;
     userExists = false;
@@ -68,40 +101,58 @@ class _AuthPageState extends State<AuthPage> {
     confirmPasswordController.clear();
   }
 
+  void _goBackToEmail() {
+    setState(() {
+      emailChecked = false;
+      userExists = false;
+      checkingEmail = false;
+      authenticating = false;
+
+      passwordController.clear();
+      confirmPasswordController.clear();
+      usernameController.clear();
+      emailController.clear();
+      selectedImage = null;
+      webImage = null;
+    });
+  }
+
   @override
   void dispose() {
     usernameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
+    _snackReaction();
     super.dispose();
   }
 
   Future<void> _checkEmail() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      checkingEmail = true;
-    });
+    setState(() => checkingEmail = true);
+
+    AppLoading.show(context, message: "Verificando e-mail...");
 
     try {
-      final exists = await authStore.checkEmail(emailController.text.trim().toLowerCase());
+      final exists = await authStore.checkEmail(
+        emailController.text.trim().toLowerCase(),
+      );
 
       if (!mounted) return;
+
       setState(() {
         emailChecked = true;
         userExists = exists;
       });
+
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erro ao verificar e-mail: $e")),
-      );
+      authStore.setMessage("Erro ao verificar e-mail", "error");
     } finally {
-      if (!mounted) return;
-      setState(() {
-        checkingEmail = false;
-      });
+      if (mounted) {
+        setState(() => checkingEmail = false);
+        AppLoading.hide(context);
+      }
     }
   }
 
@@ -123,9 +174,12 @@ class _AuthPageState extends State<AuthPage> {
     final email = emailController.text.trim().toLowerCase();
     final password = passwordController.text.trim();
 
-    setState(() {
-      authenticating = true;
-    });
+    setState(() => authenticating = true);
+
+    AppLoading.show(
+      context,
+      message: userExists ? "Entrando..." : "Criando conta...",
+    );
 
     try {
       if (userExists) {
@@ -153,23 +207,37 @@ class _AuthPageState extends State<AuthPage> {
 
       if (!mounted) return;
 
+      AppLoading.hide(context);
+
       if (authStore.user != null) {
-        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Erro ao carregar dados do perfil.")),
+        authStore.setMessage(
+          userExists ? "Login realizado!" : "Conta criada com sucesso!",
+          "success",
         );
+
+        await Future.delayed(const Duration(milliseconds: 400));
+
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/home',
+              (route) => false,
+        );
+      } else {
+        authStore.setMessage("Erro ao carregar dados do perfil", "error");
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erro: $e")),
+
+      AppLoading.hide(context);
+
+      authStore.setMessage(
+        userExists ? "Erro ao fazer login" : "Erro ao criar conta",
+        "error",
       );
     } finally {
-      if (!mounted) return;
-      setState(() {
-        authenticating = false;
-      });
+      if (mounted) {
+        setState(() => authenticating = false);
+      }
     }
   }
 
@@ -181,6 +249,26 @@ class _AuthPageState extends State<AuthPage> {
     final double width = Responsive.isMobile(context)
         ? Responsive.width(context) * 0.8
         : maxWidth;
+    final bool isCheckingDone = emailChecked;
+
+    final String title = !isCheckingDone
+        ? "Bem-vindo ao PrintLn"
+        : userExists
+        ? "Bem-vindo de volta!"
+        : "Criar nova conta!";
+
+    final String subtitle = !isCheckingDone
+        ? "Entrar ou Cadastrar-se"
+        : userExists
+        ? "Digite sua senha para continuar"
+        : "Complete seu cadastro";
+
+    final String description = !isCheckingDone
+        ? "Rede social para postar fotos, textos, curtir e interagir. Insira seu e-mail para continuar para login ou cadastro."
+        : userExists
+        ? "Que bom te ver novamente!"
+        : "Preencha os dados abaixo para criar sua conta.";
+
 
     return Scaffold(
       body: Center(
@@ -201,15 +289,16 @@ class _AuthPageState extends State<AuthPage> {
                   SizedBox(height: AppSpacing.lg),
 
                   Text(
-                    "Bem-vindo ao PrintLn",
+                    title,
                     style: AppTextStyles.heading1.copyWith(
                       color: isDark ? DarkColors.textPrimary : LightColors.textPrimary,
                     ),
                   ),
+
                   SizedBox(height: AppSpacing.xs),
 
                   Text(
-                    "Entrar ou Cadastrar-se",
+                    subtitle,
                     style: AppTextStyles.heading2.copyWith(
                       color: isDark ? DarkColors.textSecondary : LightColors.textSecondary,
                     ),
@@ -218,7 +307,7 @@ class _AuthPageState extends State<AuthPage> {
                   SizedBox(height: AppSpacing.lg),
 
                   Text(
-                    "Rede social para postar fotos, textos, curtir e interagir. Insira seu e-mail para continuar para login ou cadastro.",
+                    description,
                     textAlign: TextAlign.center,
                     style: AppTextStyles.body2.copyWith(
                       color: isDark ? DarkColors.textSecondary : LightColors.textSecondary,
@@ -226,6 +315,17 @@ class _AuthPageState extends State<AuthPage> {
                   ),
 
                   SizedBox(height: AppSpacing.xl),
+
+                  if(emailChecked)...[
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: TextButton.icon(
+                        onPressed: _goBackToEmail,
+                        icon: const Icon(Icons.arrow_back),
+                        label: const Text("Trocar e-mail"),
+                      ),
+                    ),
+                  ],
 
                   FormInput(
                     controller: emailController,
@@ -250,6 +350,7 @@ class _AuthPageState extends State<AuthPage> {
                   SizedBox(height: AppSpacing.lg),
 
                   if (!emailChecked)
+
                     AppButton(
                       title: checkingEmail ? "Verificando..." : "Continuar",
                       onPressed: checkingEmail ? null : () {
@@ -258,6 +359,7 @@ class _AuthPageState extends State<AuthPage> {
                     ),
 
                   if (emailChecked) ...[
+
                     SizedBox(height: AppSpacing.lg),
 
                     if (!userExists) ...[
@@ -323,7 +425,7 @@ class _AuthPageState extends State<AuthPage> {
                         ),
                       ),
                     ] else ...[
-                      SizedBox(height: AppSpacing.lg),
+                      SizedBox(height: AppSpacing.xs),
 
                       Align(
                         alignment: Alignment.centerRight,
@@ -363,10 +465,10 @@ class _AuthPageState extends State<AuthPage> {
                     SizedBox(height: AppSpacing.xl),
 
                     AppButton(
-                      title: authenticating ? "Entrando..." : "Entrar",
-                      onPressed: authenticating ? null : () {
-                        _authenticate();
-                      },
+                      title: authenticating
+                          ? (userExists ? "Entrando..." : "Criando conta...")
+                          : (userExists ? "Entrar" : "Criar conta"),
+                      onPressed: authenticating ? null : _authenticate,
                     ),
                   ],
                 ],
