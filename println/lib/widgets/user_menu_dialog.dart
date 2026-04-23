@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:println/core/ui/app_dialog.dart';
 import 'package:println/view_models/auth/auth_store.dart';
 import 'package:println/view_models/feed/feed_store.dart';
 import 'package:println/view_models/theme/theme_store.dart';
@@ -103,26 +104,23 @@ class UserMenuDialog extends StatelessWidget {
                   leading: const Icon(Icons.logout, color: Colors.red),
                   title: const Text("Sair", style: TextStyle(color: Colors.red)),
                   onTap: () async {
-                    final confirmed = await showDialog<bool>(
+                    final confirmed = await AppDialog.confirm(
                       context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text("Confirmar Logout"),
-                        content: const Text("Tem certeza que deseja sair?"),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: const Text("Cancelar"),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: const Text("Sair"),
-                          ),
-                        ],
-                      ),
+                      title: "Confirmar logout",
+                      description: "Tem certeza que deseja sair?",
+                      confirmText: "Sair",
+                      cancelText: "Cancelar",
+                      confirmColor: Colors.red,
+                      icon: Icons.logout,
+                      iconColor: Colors.red,
                     );
 
                     if (confirmed ?? false) {
+                      Navigator.pop(context);
                       onLogout();
+                      Future.delayed(const Duration(milliseconds: 300), () {
+
+                      });
                     }
                   },
                 ),

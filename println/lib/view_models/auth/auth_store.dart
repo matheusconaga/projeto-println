@@ -1,5 +1,6 @@
 import 'package:mobx/mobx.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:println/core/ui/app_snack_bar.dart';
 import 'package:println/data/repositories/auth_repository.dart';
 import 'dart:io';
 import 'package:println/data/repositories/user_repository.dart';
@@ -50,6 +51,18 @@ abstract class _AuthStore with Store {
 
   @observable
   UserModel? user;
+
+  @observable
+  String? message;
+
+  @observable
+  String? messageType;
+
+  @action
+  void setMessage(String msg, String type) {
+    message = msg;
+    messageType = type;
+  }
 
   @action
   User? getFirebaseUser() {
@@ -103,7 +116,10 @@ abstract class _AuthStore with Store {
       Uint8List? webPhoto,
       ) async {
     loading = true;
+
     try {
+      setMessage("Criando conta...", "info");
+
       final credential = await _repository.register(email, password);
       final firebaseUser = credential.user!;
 
@@ -120,12 +136,18 @@ abstract class _AuthStore with Store {
         isLogged = true;
       });
 
+      setMessage("Conta criada com sucesso!", "success");
+
       return credential;
+
     } catch (e) {
       runInAction(() {
         user = null;
         isLogged = false;
       });
+
+      setMessage("Erro ao criar conta", "error");
+
       rethrow;
     } finally {
       loading = false;
@@ -135,7 +157,10 @@ abstract class _AuthStore with Store {
   @action
   Future login(String email, String password) async {
     loading = true;
+
     try {
+      setMessage("Entrando...", "info");
+
       final credential = await _repository.login(email, password);
       final firebaseUser = credential.user!;
 
@@ -148,12 +173,17 @@ abstract class _AuthStore with Store {
         user = backendUser;
         isLogged = backendUser != null;
       });
+
+      setMessage("Login realizado com sucesso!", "success");
+
     } catch (e) {
       runInAction(() {
         user = null;
         isLogged = false;
       });
-      rethrow;
+
+      setMessage("Erro ao fazer login", "error");
+
     } finally {
       loading = false;
     }
@@ -189,7 +219,11 @@ abstract class _AuthStore with Store {
     if (userId.isEmpty) return;
 
     loading = true;
+
     try {
+
+      setMessage("Atualizando perfil...", "info");
+
       final updatedUser = await userRepository.updateUser(
         userId,
         username,
@@ -199,6 +233,11 @@ abstract class _AuthStore with Store {
       );
 
       user = updatedUser;
+
+      setMessage("Perfil atualizado!", "success");
+
+    } catch (e) {
+      setMessage("Erro ao atualizar perfil", "error");
     } finally {
       loading = false;
     }
@@ -207,12 +246,17 @@ abstract class _AuthStore with Store {
   @action
   Future logout() async {
     loading = true;
+
     try {
       await _repository.logout();
+
       runInAction(() {
         user = null;
         isLogged = false;
       });
+
+      setMessage("Logout realizado", "info");
+
     } finally {
       loading = false;
     }
