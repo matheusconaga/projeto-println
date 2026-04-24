@@ -1,6 +1,7 @@
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:println/core/routes/app_routes.dart';
 import 'package:println/core/theme/app_colors.dart';
+import 'package:println/core/ui/app_dialog.dart';
 import 'package:println/core/utils/responsive.dart';
 import 'package:println/models/post_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -28,12 +29,11 @@ class PostCard extends StatelessWidget {
     this.showOwnerActions = false,
     this.onEdit,
     this.onTap,
-    this.disableCommentNavigation = false
+    this.disableCommentNavigation = false,
   });
 
   @override
   Widget build(BuildContext context) {
-
     final postStore = context.read<PostStore>();
     final authStore = context.read<AuthStore>();
 
@@ -44,7 +44,8 @@ class PostCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final isOwner = currentUserId.isNotEmpty &&
+    final isOwner =
+        currentUserId.isNotEmpty &&
         post.user?.id == currentUserId &&
         showOwnerActions;
 
@@ -61,12 +62,10 @@ class PostCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               /// HEADER
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   CircleAvatar(
                     radius: 22,
                     backgroundImage: post.user?.photo != null
@@ -77,9 +76,9 @@ class PostCard extends StatelessWidget {
                         : LightColors.background,
                     child: post.user?.photo == null
                         ? Icon(
-                      Icons.person,
-                      color: isDark ? Colors.white : Colors.black,
-                    )
+                            Icons.person,
+                            color: isDark ? Colors.white : Colors.black,
+                          )
                         : null,
                   ),
 
@@ -89,7 +88,6 @@ class PostCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-
                         Row(
                           children: [
                             Text(
@@ -104,16 +102,16 @@ class PostCard extends StatelessWidget {
                             if (post.isEdited)
                               const Text(
                                 " • editado",
-                                style: TextStyle(fontSize: 12, color: Colors.grey),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
                               ),
                           ],
                         ),
 
                         if (post.location != null)
-                          Text(
-                            post.location!,
-                            style: AppTextStyles.caption,
-                          ),
+                          Text(post.location!, style: AppTextStyles.caption),
                       ],
                     ),
                   ),
@@ -127,43 +125,31 @@ class PostCard extends StatelessWidget {
                         }
 
                         if (value == "delete") {
-                          showDialog(
+                          final confirmed = await AppDialog.confirm(
                             context: context,
-                            builder: (_) => AlertDialog(
-                              title: const Text("Excluir post"),
-                              content: const Text("Deseja realmente excluir?"),
-                              actions: [
-
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text("Cancelar"),
-                                ),
-
-                                TextButton(
-                                  onPressed: () async {
-                                    await postStore.deletePost(post.id);
-
-                                    /// Remove do feed (se existir)
-                                    feedStore?.posts.removeWhere((p) => p.id == post.id);
-
-                                    Navigator.pop(context); // fecha dialog
-                                  },
-                                  child: const Text("Excluir"),
-                                ),
-                              ],
-                            ),
+                            title: "Excluir post",
+                            description: "Deseja realmente excluir?",
+                            confirmText: "Excluir",
+                            confirmColor: Colors.red,
+                            icon: Icons.delete,
+                            iconColor: Colors.red,
                           );
+
+                          if (confirmed == true) {
+
+                            await postStore.deletePost(post.id);
+
+                            feedStore?.posts.removeWhere((p) => p.id == post.id);
+
+                            if (!context.mounted) return;
+
+                            Navigator.pop(context, true);
+                          }
                         }
                       },
                       itemBuilder: (context) => const [
-                        PopupMenuItem(
-                          value: "edit",
-                          child: Text("Editar"),
-                        ),
-                        PopupMenuItem(
-                          value: "delete",
-                          child: Text("Excluir"),
-                        ),
+                        PopupMenuItem(value: "edit", child: Text("Editar")),
+                        PopupMenuItem(value: "delete", child: Text("Excluir")),
                       ],
                     ),
                 ],
@@ -172,10 +158,7 @@ class PostCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
 
               /// CONTENT
-              Text(
-                post.content,
-                style: AppTextStyles.body1,
-              ),
+              Text(post.content, style: AppTextStyles.body1),
 
               const SizedBox(height: AppSpacing.md),
 
@@ -195,12 +178,10 @@ class PostCard extends StatelessWidget {
                         fit: BoxFit.cover,
                         placeholder: (context, url) => const SizedBox(
                           height: 200,
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                          child: Center(child: CircularProgressIndicator()),
                         ),
                         errorWidget: (context, url, error) =>
-                        const Icon(Icons.error),
+                            const Icon(Icons.error),
                       ),
                     ),
                   ),
@@ -212,7 +193,6 @@ class PostCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-
                   /// LIKE
                   Observer(
                     builder: (_) => _ActionButton(
@@ -221,8 +201,7 @@ class PostCard extends StatelessWidget {
                           : Icons.favorite_border,
                       label: "Curtir",
                       count: postStore.postLikes[post.id] ?? post.likes,
-                      onTap: () =>
-                          postStore.toggleLike(post.id, currentUserId),
+                      onTap: () => postStore.toggleLike(post.id, currentUserId),
                     ),
                   ),
 
@@ -235,14 +214,12 @@ class PostCard extends StatelessWidget {
                       onTap: disableCommentNavigation
                           ? null
                           : () {
-                        Navigator.pushNamed(
-                          context,
-                          AppRoutes.detailsPost,
-                          arguments: {
-                            "postId": post.id,
-                          },
-                        );
-                      },
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.detailsPost,
+                                arguments: {"postId": post.id},
+                              );
+                            },
                     ),
                   ),
 
@@ -254,8 +231,7 @@ class PostCard extends StatelessWidget {
                           : Icons.bookmark_border,
                       label: "Salvar",
                       count: postStore.postSaves[post.id] ?? post.saves,
-                      onTap: () =>
-                          postStore.toggleSave(post.id, currentUserId),
+                      onTap: () => postStore.toggleSave(post.id, currentUserId),
                     ),
                   ),
                 ],
@@ -280,7 +256,7 @@ class _ActionButton extends StatelessWidget {
     required this.label,
     required this.count,
     this.onTap,
-    this.enabled = true
+    this.enabled = true,
   });
 
   @override
@@ -289,7 +265,7 @@ class _ActionButton extends StatelessWidget {
       onTap: enabled ? onTap : null,
       behavior: HitTestBehavior.opaque,
       child: Opacity(
-          opacity: enabled ? 1 : 0.5,
+        opacity: enabled ? 1 : 0.5,
         child: Column(
           children: [
             Row(
@@ -303,7 +279,7 @@ class _ActionButton extends StatelessWidget {
             Text(label, style: AppTextStyles.caption),
           ],
         ),
-      )
+      ),
     );
   }
 }

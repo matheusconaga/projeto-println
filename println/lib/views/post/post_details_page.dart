@@ -94,7 +94,6 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                 return const Center(child: Text("Post não encontrado"));
               }
 
-              final currentUserId = authStore.user?.id ?? "";
 
               return Column(
                 children: [
@@ -124,6 +123,7 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                 postEdited = true;
                               }
                             },
+
                           ),
 
                           const Divider(),
@@ -281,6 +281,7 @@ class _CommentInput extends StatelessWidget {
     );
   }
 }
+
 void _editCommentDialog(BuildContext context, CommentModel comment) {
   final controller = TextEditingController(text: comment.content);
   final store = context.read<PostDetailsStore>();

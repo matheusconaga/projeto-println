@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:println/core/ui/app_loading.dart';
 import 'package:println/view_models/post/post_store.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
@@ -223,42 +224,60 @@ class _PostPageState extends State<PostPage> {
 
     if (!_formKey.currentState!.validate()) return;
 
+    AppLoading.show(
+      context,
+      message: widget.isEditing
+          ? "Atualizando postagem..."
+          : "Publicando...",
+    );
+
+    await Future.delayed(Duration.zero);
+
     bool created = false;
 
-    if (widget.isEditing) {
+    try {
 
-      await postStore.editPost(
-        postId: widget.postId!,
-        content: contentController.text,
-        location: locationController.text,
-        selectedImage: selectedImage,
-        webImage: webImage,
-        removeImage: removeImage,
-      );
+      if (widget.isEditing) {
 
-      created = true;
+        await postStore.editPost(
+          postId: widget.postId!,
+          content: contentController.text,
+          location: locationController.text,
+          selectedImage: selectedImage,
+          webImage: webImage,
+          removeImage: removeImage,
+        );
 
-    } else {
+        created = true;
 
-      created = await postStore.createPost(
-        content: contentController.text,
-        location: locationController.text,
-        selectedImage: selectedImage,
-        webImage: webImage,
-      );
+      } else {
+
+        created = await postStore.createPost(
+          content: contentController.text,
+          location: locationController.text,
+          selectedImage: selectedImage,
+          webImage: webImage,
+        );
+
+      }
+
+    } finally {
+
+      if (mounted) {
+        AppLoading.hide(context);
+      }
 
     }
 
-    if (created && mounted) {
+    if (!mounted) return;
+
+    if (created) {
       Navigator.pop(context, true);
     } else if (postStore.error != null) {
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(postStore.error!)),
       );
-
     }
-
   }
 
   @override
@@ -327,7 +346,13 @@ class _PostPageState extends State<PostPage> {
 
                   },
                   child: const Center(
-                    child: Text("Remover imagem"),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.delete_forever, color: AppColors.danger,size: 25,),
+                        Text("Remover imagem", style: TextStyle(color: AppColors.danger),),
+                      ],
+                    ),
                   ),
                 ),
 
