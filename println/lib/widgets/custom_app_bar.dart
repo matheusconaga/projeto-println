@@ -5,11 +5,13 @@ import 'package:println/core/theme/app_text_styles.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final VoidCallback? onBackTap;
+  final bool showNotifications;
 
   const CustomAppBar({
     super.key,
     this.title,
     this.onBackTap,
+    this.showNotifications = true
   });
 
   @override
@@ -46,28 +48,29 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       centerTitle: false,
       actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications),
-          onPressed: (){
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text("Atenção"),
-                  content: const Text("Funcionalidade ainda não implementada."),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text("OK"),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-        ),
+        if(showNotifications)
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: (){
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Atenção"),
+                    content: const Text("Funcionalidade ainda não implementada."),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("OK"),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
       ],
     );
   }

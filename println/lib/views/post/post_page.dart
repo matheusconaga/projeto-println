@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:println/core/ui/app_loading.dart';
 import 'package:println/view_models/post/post_store.dart';
+import 'package:println/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -288,8 +289,12 @@ class _PostPageState extends State<PostPage> {
 
     return Scaffold(
 
-      appBar: AppBar(
-        title: Text(widget.isEditing ? "Editar Post" : "Criar Post"),
+      appBar: CustomAppBar(
+        title: widget.isEditing ? "Editar Post" : "Criar Post",
+        onBackTap: () {
+          Navigator.pop(context, true);
+        },
+        showNotifications: false,
       ),
 
       body: SingleChildScrollView(
