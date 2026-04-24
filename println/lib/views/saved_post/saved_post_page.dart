@@ -73,6 +73,7 @@ class _SavedPostsPageState extends State<SavedPostsPage> {
         onBackTap: () {
           Navigator.pop(context, true);
         },
+        showNotifications: false,
       ),
       body: Observer(
         builder: (_) {

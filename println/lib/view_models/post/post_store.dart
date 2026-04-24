@@ -256,11 +256,12 @@ abstract class _PostStore with Store {
 
       await api.deletePost(postId);
 
-
       likedPosts.remove(postId);
       postLikes.remove(postId);
       savedPosts.remove(postId);
       postSaves.remove(postId);
+
+      feedPosts.removeWhere((p) => p.id == postId);
 
     } catch (e) {
       error = "Erro ao deletar post";

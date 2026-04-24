@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:println/core/ui/app_dialog.dart';
 import 'package:println/core/utils/format_time.dart';
 import 'package:println/models/comment_model.dart';
 import 'package:println/view_models/auth/auth_store.dart';
 import 'package:println/view_models/post/post_store.dart';
+import 'package:println/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:println/core/routes/app_routes.dart';
 import 'package:println/core/services/api_service.dart';
@@ -79,8 +81,12 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
 
         child: Scaffold(
 
-          appBar: AppBar(
-            title: const Text("Detalhes do post"),
+          appBar: CustomAppBar(
+            title: "Detalhes do post",
+            onBackTap: () {
+              Navigator.pop(context, true);
+            },
+            showNotifications: false,
           ),
 
           body: Observer(
@@ -94,7 +100,6 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                 return const Center(child: Text("Post não encontrado"));
               }
 
-              final currentUserId = authStore.user?.id ?? "";
 
               return Column(
                 children: [
@@ -124,6 +129,7 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                 postEdited = true;
                               }
                             },
+
                           ),
 
                           const Divider(),
@@ -176,11 +182,29 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                   }
 
                                   if (value == "delete") {
-                                    await detailsStore.deleteComment(
-                                      c.id,
-                                      authStore.user!.id,
-                                      postStore,
+                                    final confirmed = await AppDialog.confirm(
+                                      context: context,
+                                      title: "Excluir comentário",
+                                      description: "Deseja realmente excluir este comentário?",
+                                      confirmText: "Excluir",
+                                      confirmColor: Colors.red,
+                                      icon: Icons.delete,
+                                      iconColor: Colors.red,
                                     );
+
+                                    if (confirmed == true) {
+
+                                      await detailsStore.deleteComment(
+                                        c.id,
+                                        authStore.user!.id,
+                                        postStore,
+                                      );
+
+                                      if (!context.mounted) return;
+
+                                      // (opcional, mas recomendado pra evitar bug de rebuild)
+                                      await Future.delayed(Duration.zero);
+                                    }
                                   }
                                 },
                               )
@@ -281,6 +305,7 @@ class _CommentInput extends StatelessWidget {
     );
   }
 }
+
 void _editCommentDialog(BuildContext context, CommentModel comment) {
   final controller = TextEditingController(text: comment.content);
   final store = context.read<PostDetailsStore>();
