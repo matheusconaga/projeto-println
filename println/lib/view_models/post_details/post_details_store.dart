@@ -38,9 +38,13 @@ abstract class _PostDetailsStore with Store {
   @observable
   String? editingCommentId;
 
+  @observable
+  CommentModel? editingComment;
+
   @action
   Future<void> loadPost(String postId, PostStore postStore) async {
     loading = true;
+    error = null;
 
     try {
       final json = await api.getPostDetails(postId);
@@ -72,6 +76,8 @@ abstract class _PostDetailsStore with Store {
       String content,
       PostStore postStore,
       ) async {
+
+    error = null;
 
     final currentCount =
         postStore.postComments[postId] ?? post?.comments ?? 0;
@@ -110,6 +116,8 @@ abstract class _PostDetailsStore with Store {
 
   @action
   Future<void> editComment(String commentId, String userId, String content) async {
+    error = null;
+
     final updated = await commentService.editComment(
       commentId: commentId,
       userId: userId,
@@ -130,6 +138,7 @@ abstract class _PostDetailsStore with Store {
       String userId,
       PostStore postStore,
       ) async {
+    error = null;
     final postId = post!.id;
     final currentCount = postStore.postComments[postId] ?? post!.comments;
 

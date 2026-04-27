@@ -6,8 +6,6 @@ from app.services.post_service import PostService
 from app.db.database import get_db
 from app.core.security import get_current_user
 
-
-
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
 service = PostService()

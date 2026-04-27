@@ -118,7 +118,6 @@ abstract class _AuthStore with Store {
     loading = true;
 
     try {
-      setMessage("Criando conta...", "info");
 
       final credential = await _repository.register(email, password);
       final firebaseUser = credential.user!;
@@ -159,7 +158,6 @@ abstract class _AuthStore with Store {
     loading = true;
 
     try {
-      setMessage("Entrando...", "info");
 
       final credential = await _repository.login(email, password);
       final firebaseUser = credential.user!;
@@ -255,7 +253,7 @@ abstract class _AuthStore with Store {
         isLogged = false;
       });
 
-      setMessage("Logout realizado", "info");
+      setMessage("Logout realizado", "success");
 
     } finally {
       loading = false;

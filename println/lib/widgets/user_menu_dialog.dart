@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:println/core/theme/app_colors.dart';
 import 'package:println/core/ui/app_dialog.dart';
+import 'package:println/core/ui/app_snack_bar.dart';
 import 'package:println/view_models/auth/auth_store.dart';
 import 'package:println/view_models/feed/feed_store.dart';
 import 'package:println/view_models/theme/theme_store.dart';
@@ -83,6 +85,12 @@ class UserMenuDialog extends StatelessWidget {
                           themeStore.setTheme(
                             value ? ThemeMode.dark : ThemeMode.light,
                           );
+
+                          AppSnackbar.info(
+                            value
+                                ? "Modo escuro ativado"
+                                : "Modo claro ativado",
+                          );
                         },
                       ),
                     );
@@ -94,8 +102,12 @@ class UserMenuDialog extends StatelessWidget {
                   leading: const Icon(Icons.edit),
                   title: const Text("Editar Perfil"),
                   onTap: () {
-                    Navigator.pop(context);
-                    _showEditProfileDialog(context, user, authStore, feedStore);
+                    _showEditProfileDialog(
+                      context,
+                      user,
+                      authStore,
+                      feedStore,
+                    );
                   },
                 ),
 
@@ -117,11 +129,15 @@ class UserMenuDialog extends StatelessWidget {
 
                     if (confirmed ?? false) {
                       Navigator.pop(context);
-                      onLogout();
-                      Future.delayed(const Duration(milliseconds: 300), () {
 
+                      AppSnackbar.info("Saindo da conta...");
+
+                      Future.delayed(const Duration(milliseconds: 400), () {
+                        onLogout();
+                        AppSnackbar.success("Você saiu da conta!");
                       });
                     }
+
                   },
                 ),
               ],
@@ -205,7 +221,13 @@ class UserMenuDialog extends StatelessWidget {
                         removeImage = true;
                       });
                     },
-                    child: const Text("Remover imagem"),
+                    child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                    Icon(Icons.delete_forever, color: AppColors.danger,size: 25,),
+                    Text("Remover imagem", style: TextStyle(color: AppColors.danger),),
+                    ],
+                    ),
                   ),
 
                 const SizedBox(height: 12),
@@ -220,7 +242,17 @@ class UserMenuDialog extends StatelessWidget {
           actions: [
 
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                Navigator.pop(context);
+
+                showDialog(
+                  context: context,
+                  builder: (_) => UserMenuDialog(
+                    onEditProfile: onEditProfile,
+                    onLogout: onLogout,
+                  ),
+                );
+              },
               child: const Text("Cancelar"),
             ),
 
@@ -247,6 +279,8 @@ class UserMenuDialog extends StatelessWidget {
                     await feedStore.loadFeed();
 
                     Navigator.pop(context);
+
+                    AppSnackbar.success("Perfil atualizado com sucesso");
                   },
                   child: authStore.loading
                       ? const SizedBox(

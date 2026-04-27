@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:println/core/ui/action_menu.dart';
 import 'package:println/core/ui/app_dialog.dart';
+import 'package:println/core/ui/app_snack_bar.dart';
 import 'package:println/core/utils/format_time.dart';
 import 'package:println/models/comment_model.dart';
 import 'package:println/view_models/auth/auth_store.dart';
@@ -10,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:println/core/routes/app_routes.dart';
 import 'package:println/core/services/api_service.dart';
 import 'package:println/core/services/post_service.dart';
+import 'package:println/core/theme/app_colors.dart';
 import 'package:println/view_models/post_details/post_details_store.dart';
 import 'package:println/widgets/post_card.dart';
 
@@ -164,46 +167,35 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                               subtitle: Text(c.content),
 
                               trailing: isOwner
-                                  ? PopupMenuButton(
-                                itemBuilder: (_) => [
-                                  const PopupMenuItem(
-                                    value: "edit",
-                                    child: Text("Editar"),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: "delete",
-                                    child: Text("Excluir"),
-                                  ),
-                                ],
-                                onSelected: (value) async {
-                                  if (value == "edit") {
-                                    commentController.text = c.content;
-                                    detailsStore.editingCommentId = c.id;
-                                  }
+                                  ? ActionMenu(
+                                onEdit: () async {
+                                  commentController.text = c.content;
+                                  detailsStore.editingCommentId = c.id;
+                                  detailsStore.editingComment = c;
+                                },
 
-                                  if (value == "delete") {
-                                    final confirmed = await AppDialog.confirm(
-                                      context: context,
-                                      title: "Excluir comentário",
-                                      description: "Deseja realmente excluir este comentário?",
-                                      confirmText: "Excluir",
-                                      confirmColor: Colors.red,
-                                      icon: Icons.delete,
-                                      iconColor: Colors.red,
+                                onDelete: () async {
+                                  final confirmed = await AppDialog.confirm(
+                                    context: context,
+                                    title: "Excluir comentário",
+                                    description: "Deseja realmente excluir este comentário?",
+                                    confirmText: "Excluir",
+                                    confirmColor: AppColors.danger,
+                                    icon: Icons.delete,
+                                    iconColor: AppColors.danger,
+                                  );
+
+                                  if (confirmed == true) {
+                                    await detailsStore.deleteComment(
+                                      c.id,
+                                      authStore.user!.id,
+                                      postStore,
                                     );
 
-                                    if (confirmed == true) {
-
-                                      await detailsStore.deleteComment(
-                                        c.id,
-                                        authStore.user!.id,
-                                        postStore,
-                                      );
-
-                                      if (!context.mounted) return;
-
-                                      // (opcional, mas recomendado pra evitar bug de rebuild)
-                                      await Future.delayed(Duration.zero);
+                                    if (detailsStore.error == null) {
+                                      AppSnackbar.success("Comentário excluído");
+                                    } else {
+                                      AppSnackbar.error(detailsStore.error!);
                                     }
                                   }
                                 },
@@ -219,11 +211,15 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                   ),
                   _CommentInput(
                     controller: commentController,
+                    editingComment: detailsStore.editingComment,
+                    onCancelEdit: () {
+                      commentController.clear();
+                      detailsStore.editingCommentId = null;
+                      detailsStore.editingComment = null;
+                    },
                     onSend: () async {
                       final text = commentController.text.trim();
                       if (text.isEmpty) return;
-
-                      commentController.clear();
 
                       if (detailsStore.editingCommentId != null) {
                         await detailsStore.editComment(
@@ -232,7 +228,15 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           text,
                         );
 
+                        if (detailsStore.error == null) {
+                          AppSnackbar.success("Comentário atualizado");
+                        } else {
+                          AppSnackbar.error(detailsStore.error!);
+                        }
+
+                        commentController.clear();
                         detailsStore.editingCommentId = null;
+                        detailsStore.editingComment = null;
 
                       } else {
                         await detailsStore.addComment(
@@ -241,9 +245,17 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           text,
                           postStore,
                         );
+
+                        if (detailsStore.error == null) {
+                          AppSnackbar.success("Comentário enviado");
+                          commentController.clear();
+                        } else {
+                          AppSnackbar.error(detailsStore.error!);
+                        }
                       }
                     },
                   ),
+
                 ],
               );
 
@@ -253,52 +265,135 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
     );
   }
 }
+
 class _CommentInput extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
+  final VoidCallback onCancelEdit;
+  final CommentModel? editingComment;
 
   const _CommentInput({
     required this.controller,
     required this.onSend,
+    required this.onCancelEdit,
+    required this.editingComment,
   });
 
   @override
   Widget build(BuildContext context) {
     final authStore = context.read<AuthStore>();
     final user = authStore.user;
+    final theme = Theme.of(context);
+
+    final isEditing = editingComment != null;
 
     return SafeArea(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
+        decoration: const BoxDecoration(
+          border: Border(
+            top: BorderSide(color: Colors.black12),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
 
-            CircleAvatar(
-              radius: 18,
-              backgroundImage: user?.photo != null
-                  ? NetworkImage(user!.photo!)
-                  : null,
-            ),
+            if (isEditing)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                color: theme.scaffoldBackgroundColor,
+                child: Row(
+                  children: [
 
-            const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: onCancelEdit,
+                      child: const Icon(Icons.cancel_outlined, color: AppColors.danger,),
+                    ),
 
-            Expanded(
-              child: TextField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  hintText: "Adicione um comentário...",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                        children: [
+
+                          const Text(
+                            "Editando comentário",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          const SizedBox(height: 2),
+
+                          Text(
+                            "'${editingComment!.content}'",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
 
-            IconButton(
-              icon: const Icon(Icons.send),
-              onPressed: onSend,
-            )
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                children: [
+
+                  CircleAvatar(
+                    radius: 18,
+                    backgroundImage: user?.photo != null
+                        ? NetworkImage(user!.photo!)
+                        : null,
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  Expanded(
+                    child: TextField(
+                      controller: controller,
+                      maxLines: null,
+                      decoration: InputDecoration(
+                        hintText: isEditing
+                            ? "Editar comentário..."
+                            : "Adicione um comentário...",
+                        border: OutlineInputBorder(
+                          borderRadius:
+                          BorderRadius.circular(24),
+                        ),
+                        contentPadding:
+                        const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 6),
+
+                  IconButton(
+                    onPressed: onSend,
+                    icon: Icon(
+                      isEditing
+                          ? Icons.check_circle
+                          : Icons.send,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

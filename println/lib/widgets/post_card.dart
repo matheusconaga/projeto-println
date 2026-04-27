@@ -1,6 +1,7 @@
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:println/core/routes/app_routes.dart';
 import 'package:println/core/theme/app_colors.dart';
+import 'package:println/core/ui/action_menu.dart';
 import 'package:println/core/ui/app_dialog.dart';
 import 'package:println/core/utils/responsive.dart';
 import 'package:println/models/post_model.dart';
@@ -118,39 +119,32 @@ class PostCard extends StatelessWidget {
 
                   /// MENU DONO
                   if (isOwner)
-                    PopupMenuButton<String>(
-                      onSelected: (value) async {
-                        if (value == "edit") {
-                          await onEdit?.call();
-                        }
+                    ActionMenu(
+                      onEdit: () async {
+                        await onEdit?.call();
+                      },
 
-                        if (value == "delete") {
-                          final confirmed = await AppDialog.confirm(
-                            context: context,
-                            title: "Excluir post",
-                            description: "Deseja realmente excluir?",
-                            confirmText: "Excluir",
-                            confirmColor: Colors.red,
-                            icon: Icons.delete,
-                            iconColor: Colors.red,
-                          );
+                      onDelete: () async {
+                        final confirmed = await AppDialog.confirm(
+                          context: context,
+                          title: "Excluir post",
+                          description: "Deseja realmente excluir?",
+                          confirmText: "Excluir",
+                          confirmColor: AppColors.danger,
+                          icon: Icons.delete,
+                          iconColor: AppColors.danger,
+                        );
 
-                          if (confirmed == true) {
+                        if (confirmed == true) {
+                          await postStore.deletePost(post.id);
 
-                            await postStore.deletePost(post.id);
+                          feedStore?.posts.removeWhere((p) => p.id == post.id);
 
-                            feedStore?.posts.removeWhere((p) => p.id == post.id);
+                          if (!context.mounted) return;
 
-                            if (!context.mounted) return;
-
-                            Navigator.pop(context, true);
-                          }
+                          Navigator.pop(context, true);
                         }
                       },
-                      itemBuilder: (context) => const [
-                        PopupMenuItem(value: "edit", child: Text("Editar")),
-                        PopupMenuItem(value: "delete", child: Text("Excluir")),
-                      ],
                     ),
                 ],
               ),
