@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:println/core/ui/action_menu.dart';
 import 'package:println/core/ui/app_dialog.dart';
+import 'package:println/core/ui/app_snack_bar.dart';
 import 'package:println/core/utils/format_time.dart';
 import 'package:println/models/comment_model.dart';
 import 'package:println/view_models/auth/auth_store.dart';
@@ -165,48 +167,35 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                               subtitle: Text(c.content),
 
                               trailing: isOwner
-                                  ? PopupMenuButton(
-                                itemBuilder: (_) => [
-                                  const PopupMenuItem(
-                                    value: "edit",
-                                    child: Text("Editar"),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: "delete",
-                                    child: Text("Excluir"),
-                                  ),
-                                ],
-                                onSelected: (value) async {
-                                  if (value == "edit") {
-                                    commentController.text = c.content;
+                                  ? ActionMenu(
+                                onEdit: () async {
+                                  commentController.text = c.content;
+                                  detailsStore.editingCommentId = c.id;
+                                  detailsStore.editingComment = c;
+                                },
 
-                                    detailsStore.editingCommentId = c.id;
-                                    detailsStore.editingComment = c;
-                                  }
+                                onDelete: () async {
+                                  final confirmed = await AppDialog.confirm(
+                                    context: context,
+                                    title: "Excluir comentário",
+                                    description: "Deseja realmente excluir este comentário?",
+                                    confirmText: "Excluir",
+                                    confirmColor: AppColors.danger,
+                                    icon: Icons.delete,
+                                    iconColor: AppColors.danger,
+                                  );
 
-                                  if (value == "delete") {
-                                    final confirmed = await AppDialog.confirm(
-                                      context: context,
-                                      title: "Excluir comentário",
-                                      description: "Deseja realmente excluir este comentário?",
-                                      confirmText: "Excluir",
-                                      confirmColor: AppColors.danger,
-                                      icon: Icons.delete,
-                                      iconColor: AppColors.danger,
+                                  if (confirmed == true) {
+                                    await detailsStore.deleteComment(
+                                      c.id,
+                                      authStore.user!.id,
+                                      postStore,
                                     );
 
-                                    if (confirmed == true) {
-
-                                      await detailsStore.deleteComment(
-                                        c.id,
-                                        authStore.user!.id,
-                                        postStore,
-                                      );
-
-                                      if (!context.mounted) return;
-
-                                      // (opcional, mas recomendado pra evitar bug de rebuild)
-                                      await Future.delayed(Duration.zero);
+                                    if (detailsStore.error == null) {
+                                      AppSnackbar.success("Comentário excluído");
+                                    } else {
+                                      AppSnackbar.error(detailsStore.error!);
                                     }
                                   }
                                 },
@@ -239,6 +228,12 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           text,
                         );
 
+                        if (detailsStore.error == null) {
+                          AppSnackbar.success("Comentário atualizado");
+                        } else {
+                          AppSnackbar.error(detailsStore.error!);
+                        }
+
                         commentController.clear();
                         detailsStore.editingCommentId = null;
                         detailsStore.editingComment = null;
@@ -251,7 +246,12 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           postStore,
                         );
 
-                        commentController.clear();
+                        if (detailsStore.error == null) {
+                          AppSnackbar.success("Comentário enviado");
+                          commentController.clear();
+                        } else {
+                          AppSnackbar.error(detailsStore.error!);
+                        }
                       }
                     },
                   ),

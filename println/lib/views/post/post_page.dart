@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:println/core/ui/app_loading.dart';
+import 'package:println/core/ui/app_snack_bar.dart';
 import 'package:println/view_models/post/post_store.dart';
 import 'package:println/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
@@ -222,7 +223,6 @@ class _PostPageState extends State<PostPage> {
   }
 
   Future<void> submit() async {
-
     if (!_formKey.currentState!.validate()) return;
 
     AppLoading.show(
@@ -234,12 +234,10 @@ class _PostPageState extends State<PostPage> {
 
     await Future.delayed(Duration.zero);
 
-    bool created = false;
+    bool success = false;
 
     try {
-
       if (widget.isEditing) {
-
         await postStore.editPost(
           postId: widget.postId!,
           content: contentController.text,
@@ -249,34 +247,36 @@ class _PostPageState extends State<PostPage> {
           removeImage: removeImage,
         );
 
-        created = true;
-
+        success = true;
       } else {
-
-        created = await postStore.createPost(
+        success = await postStore.createPost(
           content: contentController.text,
           location: locationController.text,
           selectedImage: selectedImage,
           webImage: webImage,
         );
-
       }
-
+    } catch (_) {
+      success = false;
     } finally {
-
       if (mounted) {
         AppLoading.hide(context);
       }
-
     }
 
     if (!mounted) return;
 
-    if (created) {
+    if (success) {
+      AppSnackbar.success(
+        widget.isEditing
+            ? "Post atualizado com sucesso"
+            : "Post publicado com sucesso",
+      );
+
       Navigator.pop(context, true);
-    } else if (postStore.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(postStore.error!)),
+    } else {
+      AppSnackbar.error(
+        postStore.error ?? "Não foi possível concluir a operação",
       );
     }
   }
