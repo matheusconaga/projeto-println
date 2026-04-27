@@ -117,6 +117,24 @@ mixin _$PostDetailsStore on _PostDetailsStore, Store {
     });
   }
 
+  late final _$editingCommentAtom = Atom(
+    name: '_PostDetailsStore.editingComment',
+    context: context,
+  );
+
+  @override
+  CommentModel? get editingComment {
+    _$editingCommentAtom.reportRead();
+    return super.editingComment;
+  }
+
+  @override
+  set editingComment(CommentModel? value) {
+    _$editingCommentAtom.reportWrite(value, super.editingComment, () {
+      super.editingComment = value;
+    });
+  }
+
   late final _$loadPostAsyncAction = AsyncAction(
     '_PostDetailsStore.loadPost',
     context: context,
@@ -180,7 +198,8 @@ comments: ${comments},
 sendingComment: ${sendingComment},
 loading: ${loading},
 error: ${error},
-editingCommentId: ${editingCommentId}
+editingCommentId: ${editingCommentId},
+editingComment: ${editingComment}
     ''';
   }
 }

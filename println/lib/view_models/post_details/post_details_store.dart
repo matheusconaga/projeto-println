@@ -38,6 +38,9 @@ abstract class _PostDetailsStore with Store {
   @observable
   String? editingCommentId;
 
+  @observable
+  CommentModel? editingComment;
+
   @action
   Future<void> loadPost(String postId, PostStore postStore) async {
     loading = true;

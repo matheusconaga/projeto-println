@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:println/core/routes/app_routes.dart';
 import 'package:println/core/services/api_service.dart';
 import 'package:println/core/services/post_service.dart';
+import 'package:println/core/theme/app_colors.dart';
 import 'package:println/view_models/post_details/post_details_store.dart';
 import 'package:println/widgets/post_card.dart';
 
@@ -178,7 +179,9 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                 onSelected: (value) async {
                                   if (value == "edit") {
                                     commentController.text = c.content;
+
                                     detailsStore.editingCommentId = c.id;
+                                    detailsStore.editingComment = c;
                                   }
 
                                   if (value == "delete") {
@@ -187,9 +190,9 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                       title: "Excluir comentário",
                                       description: "Deseja realmente excluir este comentário?",
                                       confirmText: "Excluir",
-                                      confirmColor: Colors.red,
+                                      confirmColor: AppColors.danger,
                                       icon: Icons.delete,
-                                      iconColor: Colors.red,
+                                      iconColor: AppColors.danger,
                                     );
 
                                     if (confirmed == true) {
@@ -219,11 +222,15 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                   ),
                   _CommentInput(
                     controller: commentController,
+                    editingComment: detailsStore.editingComment,
+                    onCancelEdit: () {
+                      commentController.clear();
+                      detailsStore.editingCommentId = null;
+                      detailsStore.editingComment = null;
+                    },
                     onSend: () async {
                       final text = commentController.text.trim();
                       if (text.isEmpty) return;
-
-                      commentController.clear();
 
                       if (detailsStore.editingCommentId != null) {
                         await detailsStore.editComment(
@@ -232,7 +239,9 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           text,
                         );
 
+                        commentController.clear();
                         detailsStore.editingCommentId = null;
+                        detailsStore.editingComment = null;
 
                       } else {
                         await detailsStore.addComment(
@@ -241,9 +250,12 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           text,
                           postStore,
                         );
+
+                        commentController.clear();
                       }
                     },
                   ),
+
                 ],
               );
 
@@ -253,52 +265,135 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
     );
   }
 }
+
 class _CommentInput extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
+  final VoidCallback onCancelEdit;
+  final CommentModel? editingComment;
 
   const _CommentInput({
     required this.controller,
     required this.onSend,
+    required this.onCancelEdit,
+    required this.editingComment,
   });
 
   @override
   Widget build(BuildContext context) {
     final authStore = context.read<AuthStore>();
     final user = authStore.user;
+    final theme = Theme.of(context);
+
+    final isEditing = editingComment != null;
 
     return SafeArea(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
+        decoration: const BoxDecoration(
+          border: Border(
+            top: BorderSide(color: Colors.black12),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
 
-            CircleAvatar(
-              radius: 18,
-              backgroundImage: user?.photo != null
-                  ? NetworkImage(user!.photo!)
-                  : null,
-            ),
+            if (isEditing)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                color: theme.scaffoldBackgroundColor,
+                child: Row(
+                  children: [
 
-            const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: onCancelEdit,
+                      child: const Icon(Icons.cancel_outlined, color: AppColors.danger,),
+                    ),
 
-            Expanded(
-              child: TextField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  hintText: "Adicione um comentário...",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                        children: [
+
+                          const Text(
+                            "Editando comentário",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          const SizedBox(height: 2),
+
+                          Text(
+                            "'${editingComment!.content}'",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
 
-            IconButton(
-              icon: const Icon(Icons.send),
-              onPressed: onSend,
-            )
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                children: [
+
+                  CircleAvatar(
+                    radius: 18,
+                    backgroundImage: user?.photo != null
+                        ? NetworkImage(user!.photo!)
+                        : null,
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  Expanded(
+                    child: TextField(
+                      controller: controller,
+                      maxLines: null,
+                      decoration: InputDecoration(
+                        hintText: isEditing
+                            ? "Editar comentário..."
+                            : "Adicione um comentário...",
+                        border: OutlineInputBorder(
+                          borderRadius:
+                          BorderRadius.circular(24),
+                        ),
+                        contentPadding:
+                        const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 6),
+
+                  IconButton(
+                    onPressed: onSend,
+                    icon: Icon(
+                      isEditing
+                          ? Icons.check_circle
+                          : Icons.send,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
