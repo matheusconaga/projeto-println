@@ -34,10 +34,17 @@ migrate_working_dir/
 .packages
 **/doc/api/
 
-# Build outputs
-/build/
-build/
-println/build/
+# Flutter/Dart build interno
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+
+# Android/iOS builds
+android/app/build/
+ios/Flutter/Flutter.framework
+ios/Flutter/App.framework
 android/app/build/
 ios/Flutter/Flutter.framework
 ios/Flutter/App.framework
