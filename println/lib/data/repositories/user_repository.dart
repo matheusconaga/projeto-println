@@ -63,7 +63,6 @@ class UserRepository {
   }
 
   Future<UserModel> updateUser(
-      String userId,
       String? username,
       File? photo,
       Uint8List? webPhoto, {
@@ -80,10 +79,10 @@ class UserRepository {
     final formData = FormData.fromMap({
       if (username != null) "username": username,
       if (multipartPhoto != null) "photo": multipartPhoto,
-      "remove_photo": removePhoto.toString(),
+      "remove_photo": removePhoto,
     });
 
-    final response = await api.dio.put("/users/update/$userId", data: formData);
+    final response = await api.dio.put("/users/update", data: formData);
     return UserModel.fromJson(response.data);
   }
 

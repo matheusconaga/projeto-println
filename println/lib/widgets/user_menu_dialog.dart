@@ -128,14 +128,7 @@ class UserMenuDialog extends StatelessWidget {
                     );
 
                     if (confirmed ?? false) {
-                      Navigator.pop(context);
-
-                      AppSnackbar.info("Saindo da conta...");
-
-                      Future.delayed(const Duration(milliseconds: 400), () {
-                        onLogout();
-                        AppSnackbar.success("Você saiu da conta!");
-                      });
+                      onLogout();
                     }
 
                   },
@@ -269,7 +262,6 @@ class UserMenuDialog extends StatelessWidget {
                     removeImage ? null : webImage;
 
                     await authStore.updateUser(
-                      userId: user.id,
                       username: usernameController.text,
                       photo: finalImage,
                       webPhoto: finalWebImage,

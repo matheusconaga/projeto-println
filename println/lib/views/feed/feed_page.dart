@@ -56,6 +56,7 @@ class _FeedPageState extends State<FeedPage> {
         },
       );
 
+
       _initialized = true;
     }
   }
@@ -85,21 +86,6 @@ class _FeedPageState extends State<FeedPage> {
     super.dispose();
   }
 
-  void _logout() async {
-    await authStore.logout();
-    Navigator.pushReplacementNamed(context, AppRoutes.login);
-  }
-
-  void _openUserMenu() {
-    showDialog(
-      context: context,
-      builder: (_) => UserMenuDialog(
-        onEditProfile: () => Navigator.pop(context),
-        onLogout: _logout,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,13 +94,6 @@ class _FeedPageState extends State<FeedPage> {
         builder: (_) {
           if (authStore.user == null && authStore.loading) {
             return const Center(child: CircularProgressIndicator());
-          }
-
-          if (authStore.user == null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.pushReplacementNamed(context, AppRoutes.login);
-            });
-            return const Center(child: Text("Redirecionando..."));
           }
 
           if (feedStore.loading) {

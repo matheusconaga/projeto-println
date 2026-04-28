@@ -130,7 +130,6 @@ abstract class _AuthStore with Store {
 
   @action
   Future<void> updateUser({
-    required String userId,
     String? username,
     File? photo,
     Uint8List? webPhoto,
@@ -139,13 +138,14 @@ abstract class _AuthStore with Store {
     loading = true;
 
     try {
-      user = await userRepository.updateUser(
-        userId,
+      final updatedUser = await userRepository.updateUser(
         username,
         photo,
         webPhoto,
         removePhoto: removePhoto,
       );
+
+      user = updatedUser;
 
       setMessage("Perfil atualizado!", "success");
     } catch (_) {

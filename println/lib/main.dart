@@ -34,40 +34,34 @@ class AppWrapper extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
     final isDesktopWeb = kIsWeb && width >= 900;
 
-    return Observer(
-      builder: (_) {
+    final app = MyApp();
 
+    if (!isDesktopWeb) {
+      return app;
+    }
 
-        final app = const MyApp();
-
-        if (!isDesktopWeb) {
-          return app;
-        }
-
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          child: Center(
-            child: Container(
-              width: 390,
-              height: 744,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(42),
-                boxShadow: const [
-                  BoxShadow(
-                    blurRadius: 30,
-                    spreadRadius: 5,
-                    color: Colors.black26,
-                  ),
-                ],
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      child: Center(
+        child: Container(
+          width: 390,
+          height: 744,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(42),
+            boxShadow: const [
+              BoxShadow(
+                blurRadius: 30,
+                spreadRadius: 5,
+                color: Colors.black26,
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(34),
-                child: app,
-              ),
-            ),
+            ],
           ),
-        );
-      },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(34),
+            child: app,
+          ),
+        ),
+      ),
     );
   }
 }

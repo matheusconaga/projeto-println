@@ -145,7 +145,6 @@ mixin _$AuthStore on _AuthStore, Store {
 
   @override
   Future<void> updateUser({
-    required String userId,
     String? username,
     File? photo,
     Uint8List? webPhoto,
@@ -153,7 +152,6 @@ mixin _$AuthStore on _AuthStore, Store {
   }) {
     return _$updateUserAsyncAction.run(
       () => super.updateUser(
-        userId: userId,
         username: username,
         photo: photo,
         webPhoto: webPhoto,
