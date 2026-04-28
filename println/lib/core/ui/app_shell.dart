@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:println/core/routes/app_routes.dart';
+import 'package:println/core/ui/app_snack_bar.dart';
 import 'package:println/view_models/feed/feed_store.dart';
 import 'package:println/views/feed/feed_page.dart';
 import 'package:println/views/post/post_page.dart';
@@ -59,8 +61,17 @@ class _AppShellState extends State<AppShell> {
       builder: (_) => UserMenuDialog(
         onEditProfile: () {},
         onLogout: () async {
-          Navigator.pop(context);
+          Navigator.of(context, rootNavigator: true).pop();
+
+          AppSnackbar.info("Saindo da conta...");
+
           await authStore.logout();
+
+          AppSnackbar.success("Você saiu da conta!");
+
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, AppRoutes.login);
+          }
         },
       ),
     );
