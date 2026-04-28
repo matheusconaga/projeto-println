@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:println/core/routes/app_routes.dart';
+import 'package:println/core/ui/app_shell.dart';
 import 'package:println/views/feed/feed_page.dart';
 import 'package:println/views/login/auth_page.dart';
 import 'package:println/views/post/post_details_page.dart';
@@ -18,7 +19,7 @@ class RouteGenerator{
       case AppRoutes.login:
         return MaterialPageRoute(builder: (_) => AuthPage());
       case AppRoutes.home:
-        return MaterialPageRoute(builder: (_) => FeedPage());
+        return MaterialPageRoute(builder: (_) => AppShell());
 
       case AppRoutes.createPost:
 

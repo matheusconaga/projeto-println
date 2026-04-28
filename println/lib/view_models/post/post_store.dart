@@ -77,10 +77,6 @@ abstract class _PostStore with Store {
       }) async {
     try {
       final likedPostIds = await api.getUserLikes(currentUserId);
-
-      likedPosts.clear();
-      postLikes.clear();
-
       final likedSet = likedPostIds.toSet();
 
       for (var post in feedPosts) {
@@ -126,14 +122,11 @@ abstract class _PostStore with Store {
     try {
       final savedPostsJson = await api.getUserSaves(currentUserId);
 
-      final savedIds = savedPostsJson.map<String>((p) => p['id'] as String).toSet();
-
-      savedPosts.clear();
-      postSaves.clear();
+      final savedIds =
+      savedPostsJson.map<String>((p) => p['id'] as String).toSet();
 
       for (var post in feedPosts) {
         savedPosts[post.id] = savedIds.contains(post.id);
-
         postSaves[post.id] = post.saves;
       }
     } catch (e) {

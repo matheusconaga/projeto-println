@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -20,9 +21,55 @@ void main() async {
 
   runApp(
     const AppProviders(
-      child: MyApp(),
+      child: AppWrapper(),
     ),
   );
+}
+
+class AppWrapper extends StatelessWidget {
+  const AppWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isDesktopWeb = kIsWeb && width >= 900;
+
+    return Observer(
+      builder: (_) {
+
+
+        final app = const MyApp();
+
+        if (!isDesktopWeb) {
+          return app;
+        }
+
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          child: Center(
+            child: Container(
+              width: 390,
+              height: 744,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(42),
+                boxShadow: const [
+                  BoxShadow(
+                    blurRadius: 30,
+                    spreadRadius: 5,
+                    color: Colors.black26,
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(34),
+                child: app,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -54,6 +101,7 @@ class _MyAppState extends State<MyApp> {
         scaffoldMessengerKey: AppMessenger.messengerKey,
         title: "PrintLn",
         debugShowCheckedModeBanner: false,
+
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
 

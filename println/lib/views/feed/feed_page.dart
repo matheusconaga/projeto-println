@@ -117,7 +117,7 @@ class _FeedPageState extends State<FeedPage> {
             return const Center(child: Text("Redirecionando..."));
           }
 
-          if (feedStore.loading && feedStore.posts.isEmpty) {
+          if (feedStore.loading) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -213,49 +213,6 @@ class _FeedPageState extends State<FeedPage> {
         },
       ),
 
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: 0,
-        onTap: (index) async {
-          if (index == 1) {
-            final result = await Navigator.pushNamed(
-              context,
-              AppRoutes.createPost,
-            );
-
-            if (result == true) {
-              await _refreshAllData();
-
-              if (scrollController.hasClients) {
-                scrollController.animateTo(
-                  0,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                );
-              }
-            }
-          }
-
-          if (index == 2) {
-            final result =
-            await Navigator.pushNamed(context, AppRoutes.savedPosts);
-
-            if (result == true) {
-              await _refreshAllData();
-            }
-          }
-
-          if (index == 3) {
-            _openUserMenu();
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.add_circle), label: "Criar"),
-          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: "Salvos"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Perfil"),
-        ],
-      ),
     );
   }
 }
