@@ -185,24 +185,13 @@ class _AuthPageState extends State<AuthPage> {
       if (userExists) {
         await authStore.login(email, password);
       } else {
-        final credential = await authStore.register(
+        await authStore.register(
           email,
           password,
           usernameController.text.trim(),
           selectedImage,
           webImage,
         );
-
-        if (authStore.user == null) {
-          final backendUser = await authStore.waitForUserInBackend(
-            credential.user!.uid,
-            timeout: const Duration(seconds: 10),
-          );
-
-          if (backendUser != null) {
-            runInAction(() => authStore.user = backendUser);
-          }
-        }
       }
 
       if (!mounted) return;
@@ -210,12 +199,9 @@ class _AuthPageState extends State<AuthPage> {
       AppLoading.hide(context);
 
       if (authStore.user != null) {
-        authStore.setMessage(
-          userExists ? "Login realizado!" : "Conta criada com sucesso!",
-          "success",
+        await Future.delayed(
+          const Duration(milliseconds: 300),
         );
-
-        await Future.delayed(const Duration(milliseconds: 400));
 
         Navigator.pushNamedAndRemoveUntil(
           context,
@@ -223,15 +209,20 @@ class _AuthPageState extends State<AuthPage> {
               (route) => false,
         );
       } else {
-        authStore.setMessage("Erro ao carregar dados do perfil", "error");
+        authStore.setMessage(
+          "Erro ao carregar perfil",
+          "error",
+        );
       }
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
 
       AppLoading.hide(context);
 
       authStore.setMessage(
-        userExists ? "Erro ao fazer login" : "Erro ao criar conta",
+        userExists
+            ? "Erro ao fazer login"
+            : "Erro ao criar conta",
         "error",
       );
     } finally {
