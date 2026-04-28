@@ -56,6 +56,12 @@ class UserRepository {
     }
   }
 
+  Future<UserModel> getMe() async {
+    final response = await api.dio.get("/users/me");
+
+    return UserModel.fromJson(response.data);
+  }
+
   Future<UserModel> updateUser(
       String userId,
       String? username,

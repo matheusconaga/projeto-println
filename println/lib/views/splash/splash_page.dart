@@ -33,21 +33,6 @@ class _SplashPageState extends State<SplashPage> {
   Future<void> _loadUser() async {
     await authStore.checkAuth();
 
-    if (authStore.isLogged && authStore.user == null) {
-      final firebaseUser = authStore.getFirebaseUser();
-
-      if (firebaseUser != null) {
-        final backendUser = await authStore.waitForUserInBackend(
-          firebaseUser.uid,
-          timeout: const Duration(seconds: 10),
-        );
-
-        if (backendUser != null) {
-          runInAction(() => authStore.user = backendUser);
-        }
-      }
-    }
-
     _navigate();
   }
 

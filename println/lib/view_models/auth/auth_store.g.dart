@@ -90,16 +90,6 @@ mixin _$AuthStore on _AuthStore, Store {
     });
   }
 
-  late final _$checkAuthAsyncAction = AsyncAction(
-    '_AuthStore.checkAuth',
-    context: context,
-  );
-
-  @override
-  Future<void> checkAuth() {
-    return _$checkAuthAsyncAction.run(() => super.checkAuth());
-  }
-
   late final _$checkEmailAsyncAction = AsyncAction(
     '_AuthStore.checkEmail',
     context: context,
@@ -110,22 +100,14 @@ mixin _$AuthStore on _AuthStore, Store {
     return _$checkEmailAsyncAction.run(() => super.checkEmail(email));
   }
 
-  late final _$registerAsyncAction = AsyncAction(
-    '_AuthStore.register',
+  late final _$checkAuthAsyncAction = AsyncAction(
+    '_AuthStore.checkAuth',
     context: context,
   );
 
   @override
-  Future<UserCredential> register(
-    String email,
-    String password,
-    String username,
-    File? photo,
-    Uint8List? webPhoto,
-  ) {
-    return _$registerAsyncAction.run(
-      () => super.register(email, password, username, photo, webPhoto),
-    );
+  Future<void> checkAuth() {
+    return _$checkAuthAsyncAction.run(() => super.checkAuth());
   }
 
   late final _$loginAsyncAction = AsyncAction(
@@ -134,22 +116,25 @@ mixin _$AuthStore on _AuthStore, Store {
   );
 
   @override
-  Future<dynamic> login(String email, String password) {
+  Future<void> login(String email, String password) {
     return _$loginAsyncAction.run(() => super.login(email, password));
   }
 
-  late final _$waitForUserInBackendAsyncAction = AsyncAction(
-    '_AuthStore.waitForUserInBackend',
+  late final _$registerAsyncAction = AsyncAction(
+    '_AuthStore.register',
     context: context,
   );
 
   @override
-  Future<UserModel?> waitForUserInBackend(
-    String uid, {
-    Duration timeout = const Duration(seconds: 5),
-  }) {
-    return _$waitForUserInBackendAsyncAction.run(
-      () => super.waitForUserInBackend(uid, timeout: timeout),
+  Future<void> register(
+    String email,
+    String password,
+    String username,
+    File? photo,
+    Uint8List? webPhoto,
+  ) {
+    return _$registerAsyncAction.run(
+      () => super.register(email, password, username, photo, webPhoto),
     );
   }
 
@@ -183,7 +168,7 @@ mixin _$AuthStore on _AuthStore, Store {
   );
 
   @override
-  Future<dynamic> logout() {
+  Future<void> logout() {
     return _$logoutAsyncAction.run(() => super.logout());
   }
 
@@ -199,18 +184,6 @@ mixin _$AuthStore on _AuthStore, Store {
     );
     try {
       return super.setMessage(msg, type);
-    } finally {
-      _$_AuthStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  User? getFirebaseUser() {
-    final _$actionInfo = _$_AuthStoreActionController.startAction(
-      name: '_AuthStore.getFirebaseUser',
-    );
-    try {
-      return super.getFirebaseUser();
     } finally {
       _$_AuthStoreActionController.endAction(_$actionInfo);
     }

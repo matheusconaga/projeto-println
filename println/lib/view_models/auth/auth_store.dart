@@ -1,47 +1,22 @@
-import 'package:mobx/mobx.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:println/core/ui/app_snack_bar.dart';
-import 'package:println/data/repositories/auth_repository.dart';
 import 'dart:io';
-import 'package:println/data/repositories/user_repository.dart';
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart';
+
+import 'package:mobx/mobx.dart';
+import 'package:println/core/services/api_service.dart';
 import 'package:println/models/user_model.dart';
+
+import '../../core/services/auth_api_service.dart';
+import '../../core/services/secure_storage_service.dart';
+import '../../data/repositories/user_repository.dart';
 
 part 'auth_store.g.dart';
 
 class AuthStore = _AuthStore with _$AuthStore;
 
 abstract class _AuthStore with Store {
-  final AuthRepository _repository = AuthRepository();
-  final UserRepository userRepository = UserRepository();
-
-  late final Stream<User?> _authStream;
-
-  _AuthStore() {
-    _authStream = _repository.authStateChanges();
-    _authStream.listen((firebaseUser) async {
-      if (firebaseUser == null) {
-        runInAction(() {
-          user = null;
-          isLogged = false;
-        });
-        return;
-      }
-
-      final backendUser = await waitForUserInBackend(
-        firebaseUser.uid,
-        timeout: const Duration(seconds: 10),
-      );
-
-      if (backendUser != null) {
-        runInAction(() {
-          user = backendUser;
-          isLogged = true;
-        });
-      }
-    });
-  }
+  final authApi = AuthApiService(ApiService());
+  final storage = SecureStorageService();
+  final userRepository = UserRepository();
 
   @observable
   bool isLogged = false;
@@ -65,50 +40,62 @@ abstract class _AuthStore with Store {
   }
 
   @action
-  User? getFirebaseUser() {
-    return _repository.getCurrentUser();
-  }
-
-  @action
-  Future<void> checkAuth() async {
-    loading = true;
-    try {
-      final firebaseUser = _repository.getCurrentUser();
-
-      if (firebaseUser != null) {
-        final backendUser = await waitForUserInBackend(
-          firebaseUser.uid,
-          timeout: const Duration(seconds: 10),
-        );
-
-        runInAction(() {
-          user = backendUser;
-          isLogged = backendUser != null;
-        });
-      } else {
-        runInAction(() {
-          user = null;
-          isLogged = false;
-        });
-      }
-    } catch (e) {
-      debugPrint("Erro no checkAuth: $e");
-      runInAction(() {
-        user = null;
-        isLogged = false;
-      });
-    } finally {
-      loading = false;
-    }
-  }
-
-  @action
   Future<bool> checkEmail(String email) async {
     return await userRepository.checkEmail(email);
   }
 
   @action
-  Future<UserCredential> register(
+  Future<void> checkAuth() async {
+    loading = true;
+
+    try {
+      final token = await storage.getToken();
+
+      if (token == null) {
+        isLogged = false;
+        user = null;
+        return;
+      }
+
+      user = await userRepository.getMe();
+      isLogged = true;
+    } catch (_) {
+      await storage.logout();
+      isLogged = false;
+      user = null;
+    }
+
+    loading = false;
+  }
+
+  @action
+  Future<void> login(String email, String password) async {
+    loading = true;
+
+    try {
+      final token = await authApi.login(
+        email: email,
+        password: password,
+      );
+
+      await storage.saveToken(token);
+
+      user = await userRepository.getMe();
+      isLogged = true;
+
+      setMessage("Login realizado com sucesso!", "success");
+    } catch (_) {
+      isLogged = false;
+      user = null;
+
+      setMessage("Erro ao fazer login", "error");
+    }
+
+    loading = false;
+  }
+
+  @action
+  Future<void> register(
       String email,
       String password,
       String username,
@@ -118,92 +105,27 @@ abstract class _AuthStore with Store {
     loading = true;
 
     try {
-
-      final credential = await _repository.register(email, password);
-      final firebaseUser = credential.user!;
-
-      final newUser = await userRepository.registerUser(
-        id: firebaseUser.uid,
+      final token = await authApi.register(
         email: email,
+        password: password,
         username: username,
-        photo: photo,
-        webPhoto: webPhoto,
       );
 
-      runInAction(() {
-        user = newUser;
-        isLogged = true;
-      });
+      await storage.saveToken(token);
+
+      user = await userRepository.getMe();
+
+      isLogged = true;
 
       setMessage("Conta criada com sucesso!", "success");
-
-      return credential;
-
-    } catch (e) {
-      runInAction(() {
-        user = null;
-        isLogged = false;
-      });
+    } catch (_) {
+      isLogged = false;
+      user = null;
 
       setMessage("Erro ao criar conta", "error");
-
-      rethrow;
-    } finally {
-      loading = false;
-    }
-  }
-
-  @action
-  Future login(String email, String password) async {
-    loading = true;
-
-    try {
-
-      final credential = await _repository.login(email, password);
-      final firebaseUser = credential.user!;
-
-      final backendUser = await waitForUserInBackend(
-        firebaseUser.uid,
-        timeout: const Duration(seconds: 10),
-      );
-
-      runInAction(() {
-        user = backendUser;
-        isLogged = backendUser != null;
-      });
-
-      setMessage("Login realizado com sucesso!", "success");
-
-    } catch (e) {
-      runInAction(() {
-        user = null;
-        isLogged = false;
-      });
-
-      setMessage("Erro ao fazer login", "error");
-
-    } finally {
-      loading = false;
-    }
-  }
-
-  @action
-  Future<UserModel?> waitForUserInBackend(
-      String uid, {
-        Duration timeout = const Duration(seconds: 5),
-      }) async {
-    const intervalMs = 100;
-    var elapsed = 0;
-
-    while (elapsed < timeout.inMilliseconds) {
-      final fetchedUser = await userRepository.getUserById(uid);
-      if (fetchedUser != null) return fetchedUser;
-
-      await Future.delayed(const Duration(milliseconds: intervalMs));
-      elapsed += intervalMs;
     }
 
-    return null;
+    loading = false;
   }
 
   @action
@@ -214,15 +136,10 @@ abstract class _AuthStore with Store {
     Uint8List? webPhoto,
     bool removePhoto = false,
   }) async {
-    if (userId.isEmpty) return;
-
     loading = true;
 
     try {
-
-      setMessage("Atualizando perfil...", "info");
-
-      final updatedUser = await userRepository.updateUser(
+      user = await userRepository.updateUser(
         userId,
         username,
         photo,
@@ -230,33 +147,21 @@ abstract class _AuthStore with Store {
         removePhoto: removePhoto,
       );
 
-      user = updatedUser;
-
       setMessage("Perfil atualizado!", "success");
-
-    } catch (e) {
+    } catch (_) {
       setMessage("Erro ao atualizar perfil", "error");
-    } finally {
-      loading = false;
     }
+
+    loading = false;
   }
 
   @action
-  Future logout() async {
-    loading = true;
+  Future<void> logout() async {
+    await storage.logout();
 
-    try {
-      await _repository.logout();
+    user = null;
+    isLogged = false;
 
-      runInAction(() {
-        user = null;
-        isLogged = false;
-      });
-
-      setMessage("Logout realizado", "success");
-
-    } finally {
-      loading = false;
-    }
+    setMessage("Logout realizado", "success");
   }
 }

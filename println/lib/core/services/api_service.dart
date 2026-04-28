@@ -1,13 +1,12 @@
 import 'package:dio/dio.dart';
-import 'package:println/core/config/api_config.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../config/api_config.dart';
+import 'secure_storage_service.dart';
 
 class ApiService {
-
   late final Dio dio;
+  final SecureStorageService storage = SecureStorageService();
 
   ApiService() {
-
     dio = Dio(
       BaseOptions(
         baseUrl: ApiConfig.baseUrl,
@@ -17,15 +16,11 @@ class ApiService {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          final token = await storage.getToken();
 
-          final user = FirebaseAuth.instance.currentUser;
-
-          if (user != null) {
-
-            final token = await user.getIdToken();
-
-            options.headers["Authorization"] = "Bearer $token";
-
+          if (token != null) {
+            options.headers["Authorization"] =
+            "Bearer $token";
           }
 
           handler.next(options);
@@ -33,5 +28,4 @@ class ApiService {
       ),
     );
   }
-
 }
