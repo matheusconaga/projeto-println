@@ -23,10 +23,12 @@ app.include_router(like_router)
 app.include_router(saved_post_router)
 app.include_router(comment_router)
 
-# Isso temporário para desenvolvimento para testes 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://println-social.vercel.app",
+    ],
+    allow_origin_regex=r"http://localhost:\d+|http://127\.0\.0\.1:\d+|https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
