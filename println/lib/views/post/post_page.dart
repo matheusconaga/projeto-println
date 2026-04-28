@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:println/core/routes/app_routes.dart';
 import 'package:println/core/ui/app_loading.dart';
 import 'package:println/core/ui/app_snack_bar.dart';
 import 'package:println/view_models/post/post_store.dart';
@@ -273,11 +274,15 @@ class _PostPageState extends State<PostPage> {
             : "Post publicado com sucesso",
       );
 
-      Navigator.pop(context, true);
-    } else {
-      AppSnackbar.error(
-        postStore.error ?? "Não foi possível concluir a operação",
-      );
+      if (widget.isEditing) {
+        Navigator.pop(context, true);
+      } else {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.home,
+              (route) => false,
+        );
+      }
     }
   }
 
@@ -291,9 +296,10 @@ class _PostPageState extends State<PostPage> {
 
       appBar: CustomAppBar(
         title: widget.isEditing ? "Editar Post" : "Criar Post",
-        onBackTap: () {
+        onBackTap: widget.isEditing ?
+            () {
           Navigator.pop(context, true);
-        },
+        } : null,
         showNotifications: false,
       ),
 

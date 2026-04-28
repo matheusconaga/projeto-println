@@ -70,9 +70,6 @@ class _SavedPostsPageState extends State<SavedPostsPage> {
     return Scaffold(
       appBar: CustomAppBar(
         title: "Postagens salvas",
-        onBackTap: () {
-          Navigator.pop(context, true);
-        },
         showNotifications: false,
       ),
       body: Observer(
