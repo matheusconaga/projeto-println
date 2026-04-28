@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "498318171253",
+    "project_id": "println-auth",
+    "storage_bucket": "println-auth.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:498318171253:android:c46b989df0f1112897ec3c",
+        "android_client_info": {
+          "package_name": "com.example.println"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPf_OKCncHgzgS7iUJYkKJoLcoImFbysk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

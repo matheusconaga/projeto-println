@@ -25,6 +25,7 @@ dependencies:
   geocoding: ^2.1.0
   provider: ^6.1.5+1
   flutter_secure_storage: ^10.0.0
+  dio_smart_retry: ^6.0.0
 
 dev_dependencies:
   flutter_test:

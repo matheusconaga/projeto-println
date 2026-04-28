@@ -3,6 +3,7 @@ import 'package:println/core/routes/app_routes.dart';
 import 'package:println/core/theme/app_colors.dart';
 import 'package:println/core/ui/action_menu.dart';
 import 'package:println/core/ui/app_dialog.dart';
+import 'package:println/core/ui/app_snack_bar.dart';
 import 'package:println/core/utils/responsive.dart';
 import 'package:println/models/post_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -142,8 +143,13 @@ class PostCard extends StatelessWidget {
 
                           if (!context.mounted) return;
 
+                          AppSnackbar.success("Post excluído com sucesso");
+
+                          await Future.delayed(const Duration(milliseconds: 200));
+
                           Navigator.pop(context, true);
                         }
+
                       },
                     ),
                 ],

@@ -10,7 +10,6 @@ __pycache__/
 *.class
 *.DS_Store
 Thumbs.db
-firebase_service_account.json
 .env
 .env.*
 venv/
@@ -37,6 +36,8 @@ migrate_working_dir/
 
 # Build outputs
 /build/
+build/
+println/build/
 android/app/build/
 ios/Flutter/Flutter.framework
 ios/Flutter/App.framework
@@ -65,7 +66,6 @@ android/app/release/
 # =========================
 # Firebase
 # =========================
-google-services.json
 GoogleService-Info.plist
 
 # =========================
