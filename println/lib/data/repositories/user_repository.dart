@@ -35,7 +35,7 @@ class UserRepository {
       if (multipartPhoto != null) "photo": multipartPhoto,
     });
 
-    final response = await api.dio.post("/users/register-form", data: formData);
+    final response = await api.dio.post("/users/register", data: formData);
     return UserModel.fromJson(response.data);
   }
 

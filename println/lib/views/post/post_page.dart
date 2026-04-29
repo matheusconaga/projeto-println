@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:println/core/routes/app_routes.dart';
+import 'package:println/core/ui/app_dialog.dart';
 import 'package:println/core/ui/app_loading.dart';
 import 'package:println/core/ui/app_snack_bar.dart';
 import 'package:println/view_models/post/post_store.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:dio/dio.dart';
 
 import 'package:println/core/theme/app_spacing.dart';
 import 'package:println/core/theme/app_text_styles.dart';
@@ -123,22 +125,13 @@ class _PostPageState extends State<PostPage> {
   Future<void> getCurrentLocation(
       BuildContext context, TextEditingController locationController) async {
     try {
-      final useLocation = await showDialog<bool>(
+      final useLocation = await AppDialog.confirm(
         context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text("Usar localização?"),
-          content: const Text("Deseja adicionar sua localização atual ao post?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text("Não"),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text("Sim"),
-            ),
-          ],
-        ),
+        title: "Usar localização?",
+        description: "Deseja adicionar sua localização atual ao post?",
+        confirmText: "Sim",
+        cancelText: "Não",
+        icon: Icons.location_on,
       );
 
       if (useLocation != true) return;
@@ -147,7 +140,8 @@ class _PostPageState extends State<PostPage> {
       if (!serviceEnabled) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("O GPS está desativado. Por favor, ative-o.")),
+            const SnackBar(
+                content: Text("O GPS está desativado. Por favor, ative-o.")),
           );
         }
         return;
@@ -169,57 +163,148 @@ class _PostPageState extends State<PostPage> {
       if (permission == LocationPermission.deniedForever) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Permissão negada permanentemente. Altere nas configurações.")),
+            const SnackBar(content: Text(
+                "Permissão negada permanentemente. Altere nas configurações.")),
           );
         }
         return;
       }
 
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        desiredAccuracy: LocationAccuracy.bestForNavigation,
+        timeLimit: const Duration(seconds: 15),
       );
+      String finalLocationText = "";
 
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
+      try {
+        if (kIsWeb) {
+          try {
+            final dio = Dio();
 
-      if (placemarks.isNotEmpty) {
-        final place = placemarks.first;
+            final response = await dio.get(
+              "https://nominatim.openstreetmap.org/reverse",
+              queryParameters: {
+                "format": "json",
+                "lat": position.latitude,
+                "lon": position.longitude,
+              },
+            );
 
-        const stateAbbreviations = {
-          "Acre": "AC", "Alagoas": "AL", "Amapá": "AP", "Amazonas": "AM",
-          "Bahia": "BA", "Ceará": "CE", "Distrito Federal": "DF",
-          "Espírito Santo": "ES", "Goiás": "GO", "Maranhão": "MA",
-          "Mato Grosso": "MT", "Mato Grosso do Sul": "MS", "Minas Gerais": "MG",
-          "Pará": "PA", "Paraíba": "PB", "Paraná": "PR", "Pernambuco": "PE",
-          "Piauí": "PI", "Rio de Janeiro": "RJ", "Rio Grande do Norte": "RN",
-          "Rio Grande do Sul": "RS", "Rondônia": "RO", "Roraima": "RR",
-          "Santa Catarina": "SC", "São Paulo": "SP", "Sergipe": "SE", "Tocantins": "TO",
-        };
+            final data = response.data;
+            final address = data?['address'];
 
-        String city = place.subAdministrativeArea ??
-            place.locality ??
-            place.subLocality ??
-            "Cidade Desconhecida";
+            String city = address?['city'] ??
+                address?['town'] ??
+                address?['village'] ??
+                "";
 
-        String stateRaw = place.administrativeArea ?? "";
-        String uf = "";
+            String state = address?['state'] ?? "";
 
-        if (stateRaw.length == 2) {
-          uf = stateRaw.toUpperCase();
-        } else {
-          uf = stateAbbreviations[stateRaw] ?? stateRaw;
+            const stateAbbreviations = {
+              "Acre": "AC", "Alagoas": "AL", "Amapá": "AP", "Amazonas": "AM",
+              "Bahia": "BA", "Ceará": "CE", "Distrito Federal": "DF",
+              "Espírito Santo": "ES", "Goiás": "GO", "Maranhão": "MA",
+              "Mato Grosso": "MT", "Mato Grosso do Sul": "MS", "Minas Gerais": "MG",
+              "Pará": "PA", "Paraíba": "PB", "Paraná": "PR", "Pernambuco": "PE",
+              "Piauí": "PI", "Rio de Janeiro": "RJ", "Rio Grande do Norte": "RN",
+              "Rio Grande do Sul": "RS", "Rondônia": "RO", "Roraima": "RR",
+              "Santa Catarina": "SC", "São Paulo": "SP", "Sergipe": "SE", "Tocantins": "TO",
+            };
+
+            String uf = "";
+
+            if (state.isNotEmpty) {
+              uf = state.length == 2
+                  ? state.toUpperCase()
+                  : (stateAbbreviations[state] ?? state);
+            }
+
+            finalLocationText = (city.isNotEmpty || uf.isNotEmpty)
+                ? "$city - $uf".trim()
+                : "Lat: ${position.latitude.toStringAsFixed(2)}, "
+                "Lng: ${position.longitude.toStringAsFixed(2)}";
+
+          } catch (e) {
+            debugPrint("Web geocoding falhou: $e");
+          }
         }
 
-        locationController.text = "$city - $uf";
+        else {
+          List<Placemark> placemarks = [];
+
+          try {
+            placemarks = await placemarkFromCoordinates(
+              position.latitude,
+              position.longitude,
+            );
+          } catch (e) {
+            debugPrint("Geocoding mobile falhou: $e");
+          }
+
+          if (placemarks.isNotEmpty) {
+            final place = placemarks.first;
+
+            const stateAbbreviations = {
+              "Acre": "AC",
+              "Alagoas": "AL",
+              "Amapá": "AP",
+              "Amazonas": "AM",
+              "Bahia": "BA",
+              "Ceará": "CE",
+              "Distrito Federal": "DF",
+              "Espírito Santo": "ES",
+              "Goiás": "GO",
+              "Maranhão": "MA",
+              "Mato Grosso": "MT",
+              "Mato Grosso do Sul": "MS",
+              "Minas Gerais": "MG",
+              "Pará": "PA",
+              "Paraíba": "PB",
+              "Paraná": "PR",
+              "Pernambuco": "PE",
+              "Piauí": "PI",
+              "Rio de Janeiro": "RJ",
+              "Rio Grande do Norte": "RN",
+              "Rio Grande do Sul": "RS",
+              "Rondônia": "RO",
+              "Roraima": "RR",
+              "Santa Catarina": "SC",
+              "São Paulo": "SP",
+              "Sergipe": "SE",
+              "Tocantins": "TO",
+            };
+
+            String city = place.subAdministrativeArea ??
+                place.locality ??
+                place.subLocality ??
+                "Cidade Desconhecida";
+
+            String stateRaw = place.administrativeArea ?? "";
+
+            String uf = stateRaw.length == 2
+                ? stateRaw.toUpperCase()
+                : (stateAbbreviations[stateRaw] ?? stateRaw);
+
+            finalLocationText = "$city - $uf";
+          }
+        }
+
+        if (finalLocationText.isEmpty) {
+          finalLocationText =
+          "Lat: ${position.latitude.toStringAsFixed(2)}, "
+              "Lng: ${position.longitude.toStringAsFixed(2)}";
+        }
+
+        locationController.text = finalLocationText;
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Erro ao obter localização: $e")),
+          );
+        }
       }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erro ao obter localização: $e")),
-        );
-      }
+    } catch(_){
+
     }
   }
 

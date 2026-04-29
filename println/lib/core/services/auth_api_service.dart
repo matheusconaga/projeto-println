@@ -20,20 +20,4 @@ class AuthApiService {
     return response.data["access_token"];
   }
 
-  Future<String> register({
-    required String email,
-    required String password,
-    required String username,
-  }) async {
-    final response = await api.dio.post(
-      "/auth/register",
-      data: {
-        "email": email,
-        "password": password,
-        "username": username,
-      },
-    );
-
-    return response.data["access_token"];
-  }
 }

@@ -192,6 +192,7 @@ class _AuthPageState extends State<AuthPage> {
           selectedImage,
           webImage,
         );
+        await authStore.login(email, password);
       }
 
       if (!mounted) return;
@@ -399,7 +400,7 @@ class _AuthPageState extends State<AuthPage> {
                         controller: passwordController,
                         hint: "Digite sua senha",
                         title: "Senha",
-                        obscure: true,
+                        obscure: false,
                         validator: Validators.validarSenha,
                       ),
 

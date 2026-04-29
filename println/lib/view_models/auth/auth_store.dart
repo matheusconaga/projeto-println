@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 import 'package:println/core/services/api_service.dart';
+import 'package:println/data/repositories/auth_repository.dart';
 import 'package:println/models/user_model.dart';
 
 import '../../core/services/auth_api_service.dart';
@@ -17,6 +19,7 @@ abstract class _AuthStore with Store {
   final authApi = AuthApiService(ApiService());
   final storage = SecureStorageService();
   final userRepository = UserRepository();
+  final _authRepository = AuthRepository();
 
   @observable
   bool isLogged = false;
@@ -95,7 +98,7 @@ abstract class _AuthStore with Store {
   }
 
   @action
-  Future<void> register(
+  Future<UserCredential> register(
       String email,
       String password,
       String username,
@@ -103,29 +106,33 @@ abstract class _AuthStore with Store {
       Uint8List? webPhoto,
       ) async {
     loading = true;
-
     try {
-      final token = await authApi.register(
+      final credential = await _authRepository.register(email, password);
+      final firebaseUser = credential.user!;
+
+      final newUser = await userRepository.registerUser(
+        id: firebaseUser.uid,
         email: email,
-        password: password,
         username: username,
+        photo: photo,
+        webPhoto: webPhoto,
       );
 
-      await storage.saveToken(token);
+      runInAction(() {
+        user = newUser;
+        isLogged = true;
+      });
 
-      user = await userRepository.getMe();
-
-      isLogged = true;
-
-      setMessage("Conta criada com sucesso!", "success");
-    } catch (_) {
-      isLogged = false;
-      user = null;
-
-      setMessage("Erro ao criar conta", "error");
+      return credential;
+    } catch (e) {
+      runInAction(() {
+        user = null;
+        isLogged = false;
+      });
+      rethrow;
+    } finally {
+      loading = false;
     }
-
-    loading = false;
   }
 
   @action
