@@ -126,7 +126,7 @@ mixin _$AuthStore on _AuthStore, Store {
   );
 
   @override
-  Future<void> register(
+  Future<UserCredential> register(
     String email,
     String password,
     String username,

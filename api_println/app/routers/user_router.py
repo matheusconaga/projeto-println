@@ -41,13 +41,6 @@ def get_user_by_firebase(
     return user
 
 
-@router.post("/register", response_model=UserResponse)
-def register(
-    data: UserCreate,
-    db: Session = Depends(get_db)
-):
-    return service.register_user(db, data)
-
 
 @router.get("/me", response_model=UserResponse)
 def get_me(
@@ -83,8 +76,8 @@ def get_user(
     return user
 
 
-@router.post("/register-form", response_model=UserResponse)
-async def register_form(
+@router.post("/register", response_model=UserResponse)
+async def register(
     id: str = Form(...),
     email: str = Form(...),
     username: str = Form(...),
