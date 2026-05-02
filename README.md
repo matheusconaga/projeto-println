@@ -59,7 +59,23 @@ Senha: 123456
 - 📍 Geolocalização híbrida (Web + Mobile)
 - ☁️ Integração com serviços externos em nuvem
 - 🧩 Escalável e modular
+
+---
+
+## 📱 Preview do Aplicativo
+
+<div align="center">
+
+| Feed Principal | Login Seguro | Perfil |
+|----------------|-------------|--------|
+| <p align="center"><img src="https://github.com/matheusconaga/projeto-println/blob/main/assets/feed_println.png?raw=true" width="220"></p> | <p align="center"><img src="https://github.com/matheusconaga/projeto-println/blob/main/assets/02_login.jpg?raw=true" width="220"></p> | <p align="center"><img src="https://github.com/matheusconaga/projeto-println/blob/main/assets/04_perfiluser.jpg?raw=true" width="220"></p> |
+
+| Criar Publicação | Comentários | Light Mode |
+|------------------|-------------|-----------|
+| <p align="center"><img src="https://github.com/matheusconaga/projeto-println/blob/main/assets/03_criarpost.jpg?raw=true" width="220"></p> | <p align="center"><img src="https://github.com/matheusconaga/projeto-println/blob/main/assets/05_comentarios.jpg?raw=true" width="220"></p> | <p align="center"><img src="https://github.com/matheusconaga/projeto-println/blob/main/assets/06_modoclaro.jpg?raw=true" width="220"></p> |
   
+</div>
+
 ---
 
 ## 🛠️ Stack Tecnológica
