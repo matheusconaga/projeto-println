@@ -6,7 +6,7 @@
 <h1 align="center">📲 PrintLn</h1>
 
 <p align="center">
-A modern social network focused on mobile experience, secure authentication, and cloud services integration.
+Rede social moderna com foco em experiência mobile, autenticação segura e integração com serviços em nuvem.
 </p>
 
 <p align="center">
@@ -29,58 +29,58 @@ A modern social network focused on mobile experience, secure authentication, and
 
 ---
 
-## 📌 About the Project
+## 📌 Sobre o Projeto
 
-**PrintLn** is a mobile social network developed to offer a seamless content sharing experience, focusing on performance, simplicity, and integration with modern cloud services.
+O **PrintLn** é uma rede social mobile desenvolvida para oferecer uma experiência fluida de compartilhamento de conteúdo, com foco em performance, simplicidade e integração com serviços modernos em nuvem.
 
-Users can create posts with text and images, interact with their own publications, and utilize native device features such as the **camera and geolocation**.
+O usuário pode criar posts com texto e imagem, interagir com suas próprias publicações e utilizar recursos nativos do dispositivo como **câmera e geolocalização**.
 
-### Key Features:
+### Principais funcionalidades:
 
-- 🔐 User registration and authentication
-- 📝 Create, read, update, and delete (CRUD) posts and comments
-- 📸 Image upload using camera or gallery
-- 📍 Geolocation integration (city/state)
-- ❤️ Real-time publication feed
-- 💾 Save posts functionality
-- 👤 Username and profile picture updates
-- 🌙 Built-in app dark mode
-- 📱 Responsive mobile interface
+- 🔐 Cadastro e autenticação de usuários
+- 📝 Criação, edição e exclusão de posts e comentários
+- 📸 Upload de imagens com câmera ou galeria
+- 📍 Integração com localização (cidade/estado)
+- ❤️ Feed de publicações em tempo real
+- 💾 Salvamento de posts
+- 👤 Alteração de username e foto de perfil
+- 🌙 Modo escuro integrado ao aplicativo
+- 📱 Interface mobile responsiva
 
-### 🧪 Test Access:
+### 🧪 Acesso para Testes
 
-If you want to quickly explore the application without creating an account, use the demonstration login:
+Caso queira explorar rapidamente a aplicação sem criar uma conta, utilize o login de demonstração:
 
 ```text
 E-mail: matheus@gmail.com
-Password: 123456
+Senha: 123456
 ```
 
-## 🧠 Core Differentials
+## 🧠 Diferenciais
 
-- ⚡ Mobile-first experience
-- 🔄 Reactive state management with MobX
-- 🌐 Decoupled architecture (Frontend + Backend API)
-- 📍 Hybrid geolocation (Web + Mobile)
-- ☁️ Integration with external cloud services
-- 🧩 Scalable and modular
+- ⚡ Experiência mobile-first
+- 🔄 Estado reativo com MobX
+- 🌐 Arquitetura separada (Frontend + Backend API)
+- 📍 Geolocalização híbrida (Web + Mobile)
+- ☁️ Integração com serviços externos em nuvem
+- 🧩 Escalável e modular
 
-## 📱 App Preview
+
+## 📱 Preview do Aplicativo
 
 <div align="center">
 
-| Main Feed | Secure Login | Profile |
+| Feed Principal | Login Seguro | Perfil |
 |----------------|-------------|--------|
 | <p align="center"><img src="https://github.com/matheusconaga/projeto-println/blob/main/assets/feed_println.png?raw=true" width="220"></p> | <p align="center"><img src="https://github.com/matheusconaga/projeto-println/blob/main/assets/02_login.jpg?raw=true" width="220"></p> | <p align="center"><img src="https://github.com/matheusconaga/projeto-println/blob/main/assets/04_perfiluser.jpg?raw=true" width="220"></p> |
 
-| Create Post | Comments | Light Mode |
+| Criar Publicação | Comentários | Light Mode |
 |------------------|-------------|-----------|
 | <p align="center"><img src="https://github.com/matheusconaga/projeto-println/blob/main/assets/03_criarpost.jpg?raw=true" width="220"></p> | <p align="center"><img src="https://github.com/matheusconaga/projeto-println/blob/main/assets/05_comentarios.jpg?raw=true" width="220"></p> | <p align="center"><img src="https://github.com/matheusconaga/projeto-println/blob/main/assets/06_modoclaro.jpg?raw=true" width="220"></p> |
   
 </div>
 
-
-## 🛠️ Tech Stack
+## 🛠️ Stack Tecnológica
 
 ### 📱 Frontend (Flutter)
 
@@ -92,7 +92,7 @@ Password: 123456
   <img src="https://img.shields.io/badge/Geolocator-3DDC84?style=flat"/>
 </p>
 
-### ⚙️ Backend and Services
+### ⚙️ Backend e Serviços
 
 <p>
   <img src="https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white"/>
@@ -103,66 +103,67 @@ Password: 123456
 </p>
 
 
-### 🌐 Deployment
+### 🌐 Deploys
 
 <p>
   <a href="https://println-social.vercel.app/" target="_blank"><img src="https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white"/></a>
   <a href="https://println-api.onrender.com/docs" target="_blank"><img src="https://img.shields.io/badge/Render-46E3B7?style=flat&logo=render&logoColor=black"/></a>
 </p>
 
-## 🧱 System Architecture
+
+## 🧱 Arquitetura do Sistema
 
 ```text
 Flutter App (PrintLn)
       ↓
-FastAPI (REST Backend)
+FastAPI (Backend REST)
       ↓
-Firebase Auth → authentication
-Cloudinary → images
-PostgreSQL → data
+Firebase Auth → autenticação
+Cloudinary → imagens
+PostgreSQL → dados
 ```
 
-## 💻 How to Run the Project Locally
+## 💻 Como rodar o projeto localmente
 
 ### 📱 Frontend (Flutter)
-Navigate to the project directory:
+Acesse a pasta do projeto :
 ```bash
 cd println
 ```
-Install dependencies:
+Instale as dependências:
 
 ```bash
 flutter pub get
 ```
-Run the app:
+Rode o app:
 ```bash
 flutter run
 ```
 
 ### ⚙️ Backend (FastAPI)
-Navigate to the project directory:
+Acesse a pasta do projeto:
 ```bash
 cd api_println
 ```
-Create a virtual environment:
+Crie uma maquina virtual:
 ```bash
 python -m venv venv
 ```
-Activate the virtual environment:
+Acesse a maquina virtual:
 ```bash
 .\venv/bin/activate
 ```
-Install dependencies:
+Baixe os requirements:
 ```bash
 pip install -r requirements.txt
 ```
-Run the API:
+Rode a api:
 ```bash
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
-## ⚙️ Environment Variables
+## ⚙️ Variáveis de Ambiente
 
-Create a `.env` file in the root of the api_println directory with the following configuration:
+Crie um arquivo `.env` na raiz do api_println com as seguintes configurações:
 
 ```env
 # Cloudinary
@@ -184,24 +185,24 @@ FIREBASE_CREDENTIALS_JSON
 
 ```
 
-## 📈 Future Enhancements
+## 📈 Possíveis Evoluções
 
-- 🧪 Automated backend and frontend testing
-- 🔐 Email password recovery
-- 🔔 Real-time push notifications
-- 👥 Friends, followers, and following system
-- 📰 Personalized feed from followed users
-- 🔍 User and publication filters
-- 📊 User metrics dashboard
+- 🧪 Testes automatizados no backend e frontend
+- 🔐 Recuperação de senha por e-mail
+- 🔔 Push notifications em tempo real
+- 👥 Sistema de amigos, seguidores e seguindo
+- 📰 Feed personalizado de usuários seguidos
+- 🔍 Filtros de usuários e publicações
+- 📊 Dashboard de métricas do usuário
 
-
-## 📄 License
+## 📄 Licença
 <p>
-This project is available for study, portfolio, and learning purposes. 
-Feel free to fork it, enhance the solution, and build new improvements on top of it.
+Este projeto está disponível para fins de estudo, portfólio e aprendizado. 
+Sinta-se à vontade para fazer um fork, evoluir a solução e criar novas melhorias a partir dele.
 </p>
 
-## 👨‍💻 Author
+
+## 👨‍💻 Autor
 
 <p align="center">
   <img src="https://avatars.githubusercontent.com/matheusconaga" width="110px;" style="border-radius:50%;" />
